@@ -1,12 +1,17 @@
 <idea-plugin>
     <extensions defaultExtensionNs="com.intellij">
         <sdkType implementation="com.reason.OCamlSdkType"/>
-        <configurationType implementation="com.reason.ide.repl.ReplRunConfigurationType"/>
         <moduleConfigurationEditorProvider implementation="com.reason.module.OCamlDefaultModuleEditorsProvider"/>
         <projectStructure.sourceRootEditHandler implementation="com.reason.module.OCamlBinaryRootEditHandler"/>
 
         <orderRootType implementation="com.reason.OCamlSourcesOrderRootType"/>
         <OrderRootTypeUI key="OCAML_SOURCES" implementationClass="com.reason.OCamlSourcesOrderRootTypeUIFactory"/>
+
+        <!--
+         | Repl
+         -->
+
+        <configurationType implementation="com.reason.ide.repl.ReplRunConfigurationType"/>
 
         <!--
          | External system integration (the import from model...)
@@ -36,5 +41,16 @@
                                         implementationClass="com.reason.ide.go.ORLineMarkerProvider"/>
         <codeInsight.lineMarkerProvider language="OCaml"
                                         implementationClass="com.reason.ide.go.ORLineMarkerProvider"/>
+
+        <!--
+         | Debug
+         -->
+
+        <xdebugger.breakpointType implementation="com.reason.ide.debug.ORLineBreakpointType"/>
+
+        <programRunner implementation="com.reason.ide.debug.OClDebugRunner"/>
+        <configurationType implementation="com.reason.ide.debug.conf.OclApplicationRunConfigurationType"/>
+        <runConfigurationProducer implementation="com.reason.ide.debug.conf.OclApplicationConfigurationProducer"/>
+
     </extensions>
 </idea-plugin>
