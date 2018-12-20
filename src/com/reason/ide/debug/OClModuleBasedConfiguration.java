@@ -4,8 +4,8 @@ import org.jetbrains.annotations.NotNull;
 import com.intellij.execution.configurations.RunConfigurationModule;
 import com.intellij.openapi.project.Project;
 
-class OCamlModuleBasedConfiguration extends RunConfigurationModule {
-    public OCamlModuleBasedConfiguration(@NotNull Project project) {
+public class OClModuleBasedConfiguration extends RunConfigurationModule {
+    public OClModuleBasedConfiguration(@NotNull Project project) {
         super(project);
     }
 }

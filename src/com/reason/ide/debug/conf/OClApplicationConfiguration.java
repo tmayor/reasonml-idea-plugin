@@ -2,7 +2,10 @@ package com.reason.ide.debug.conf;
 
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.Executor;
-import com.intellij.execution.configurations.*;
+import com.intellij.execution.configurations.ConfigurationType;
+import com.intellij.execution.configurations.ModuleBasedConfiguration;
+import com.intellij.execution.configurations.RunConfiguration;
+import com.intellij.execution.configurations.RunProfileState;
 import com.intellij.execution.runners.ExecutionEnvironment;
 import com.intellij.openapi.module.Module;
 import com.intellij.openapi.module.ModuleManager;
@@ -12,6 +15,7 @@ import com.intellij.openapi.util.InvalidDataException;
 import com.intellij.openapi.util.WriteExternalException;
 import com.intellij.util.xmlb.XmlSerializer;
 import com.reason.ide.debug.OClModuleBasedConfiguration;
+import com.reason.lang.core.psi.PsiModule;
 import org.jdom.Element;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -19,8 +23,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class OClApplicationConfiguration extends ModuleBasedConfiguration<OClModuleBasedConfiguration> {
-    private String myWorkDirectory;
+public class OClApplicationConfiguration extends ModuleBasedConfiguration<OClModuleBasedConfiguration, PsiModule> {
+
+    private String m_workDirectory;
 
     OClApplicationConfiguration(Project project, String name, ConfigurationType configurationType) {
         super(name, new OClModuleBasedConfiguration(project), configurationType.getConfigurationFactories()[0]);
@@ -28,11 +33,11 @@ public class OClApplicationConfiguration extends ModuleBasedConfiguration<OClMod
 
     @Nullable
     public String getWorkDirectory() {
-        return myWorkDirectory;
+        return m_workDirectory;
     }
 
     public void setWorkDirectory(@Nullable String workDirectory) {
-        myWorkDirectory = workDirectory;
+        m_workDirectory = workDirectory;
     }
 
     @Override
@@ -49,7 +54,7 @@ public class OClApplicationConfiguration extends ModuleBasedConfiguration<OClMod
 
     @Nullable
     @Override
-    public RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment) throws ExecutionException {
+    public RunProfileState getState(@NotNull Executor executor, @NotNull ExecutionEnvironment environment) {
         OClModuleBasedConfiguration configuration = getConfigurationModule();
         Module module = configuration.getModule();
         return new OClApplicationRunningState(environment, module, this);
@@ -62,7 +67,7 @@ public class OClApplicationConfiguration extends ModuleBasedConfiguration<OClMod
     }
 
     @Override
-    public void readExternal(Element element) throws InvalidDataException {
+    public void readExternal(@NotNull Element element) throws InvalidDataException {
         super.readExternal(element);
         XmlSerializer.deserializeInto(this, element);
     }

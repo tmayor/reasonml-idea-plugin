@@ -295,6 +295,10 @@
         <completion.contributor language="Mly"
                                 implementationClass="com.reason.ide.insight.OclKeywordCompletionContributor"/>
 
+        <!-- ? -->
+        <projectService serviceInterface="com.reason.lang.OclCodeFragmentFactory"
+                        serviceImplementation="com.reason.lang.OclCodeFragmentFactory"/>
+
         <!-- Specifies semicolon-separated list of paths which should be added to the classpath of the compiler server -->
         <compileServer.plugin classpath="jps-plugin.jar"/>
 

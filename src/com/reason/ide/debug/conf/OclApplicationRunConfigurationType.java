@@ -4,9 +4,8 @@ import com.intellij.execution.configurations.ConfigurationFactory;
 import com.intellij.execution.configurations.ConfigurationType;
 import com.intellij.execution.configurations.ConfigurationTypeBase;
 import com.intellij.execution.configurations.RunConfiguration;
-import com.intellij.openapi.extensions.Extensions;
 import com.intellij.openapi.project.Project;
-import com.reason.icons.Icons;
+import com.reason.Icons;
 import org.jetbrains.annotations.NotNull;
 
 public class OclApplicationRunConfigurationType extends ConfigurationTypeBase {
@@ -16,7 +15,7 @@ public class OclApplicationRunConfigurationType extends ConfigurationTypeBase {
     }
 
     public static OclApplicationRunConfigurationType getInstance() {
-        return Extensions.findExtension(CONFIGURATION_TYPE_EP, OclApplicationRunConfigurationType.class);
+        return CONFIGURATION_TYPE_EP.findExtensionOrFail(OclApplicationRunConfigurationType.class);
     }
 
     public static class OclFactory extends ConfigurationFactory {
