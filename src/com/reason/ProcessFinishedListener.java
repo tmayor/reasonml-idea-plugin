@@ -1,7 +1,10 @@
 package com.reason;
 
-import com.intellij.execution.process.*;
 import org.jetbrains.annotations.NotNull;
+import com.intellij.execution.process.ProcessAdapter;
+import com.intellij.execution.process.ProcessEvent;
+import com.intellij.execution.process.ProcessHandler;
+import com.intellij.execution.process.ProcessOutputTypes;
 
 public class ProcessFinishedListener extends ProcessAdapter {
     private long m_start;
@@ -15,7 +18,7 @@ public class ProcessFinishedListener extends ProcessAdapter {
         long end = System.currentTimeMillis();
         Object source = event.getSource();
         if (source instanceof ProcessHandler) {
-            ((ProcessHandler) source).notifyTextAvailable("Process finished in " + formatBuildTime(end - m_start) + "\n\n", ProcessOutputTypes.STDOUT);
+            ((ProcessHandler) source).notifyTextAvailable("Process finished in " + formatBuildTime(end - m_start) + "\n\n", ProcessOutputTypes.SYSTEM);
         }
     }
 
