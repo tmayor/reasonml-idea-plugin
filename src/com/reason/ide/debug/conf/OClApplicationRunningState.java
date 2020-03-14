@@ -12,9 +12,9 @@ import org.jetbrains.annotations.NotNull;
 
 public class OClApplicationRunningState extends CommandLineState {
     private final Module m_module;
-    private final OClApplicationConfiguration m_configuration;
+    private final OclRunConfiguration m_configuration;
 
-    OClApplicationRunningState(ExecutionEnvironment environment, Module module, OClApplicationConfiguration configuration) {
+    OClApplicationRunningState(ExecutionEnvironment environment, Module module, OclRunConfiguration configuration) {
         super(environment);
         m_module = module;
         m_configuration = configuration;

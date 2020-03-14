@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
 
-public class OclRunConfigurationEditorForm extends SettingsEditor<OClApplicationConfiguration> {
+public class OclRunConfigurationEditorForm extends SettingsEditor<OclRunConfiguration> {
     private JPanel c_mainPanel;
     private ModulesComboBox c_modulesComboBox;
     private TextFieldWithBrowseButton c_workingDir;
@@ -27,14 +27,14 @@ public class OclRunConfigurationEditorForm extends SettingsEditor<OClApplication
     }
 
     @Override
-    protected void resetEditorFrom(@NotNull OClApplicationConfiguration configuration) {
+    protected void resetEditorFrom(@NotNull OclRunConfiguration configuration) {
         c_modulesComboBox.fillModules(configuration.getProject(), JavaModuleType.getModuleType()/*todo*/);
         c_modulesComboBox.setSelectedModule(configuration.getConfigurationModule().getModule());
         c_workingDir.setText(configuration.getWorkDirectory());
     }
 
     @Override
-    protected void applyEditorTo(@NotNull OClApplicationConfiguration configuration) {
+    protected void applyEditorTo(@NotNull OclRunConfiguration configuration) {
         configuration.setWorkDirectory(c_workingDir.getText());
     }
 }

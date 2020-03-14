@@ -12,13 +12,13 @@ import com.intellij.xdebugger.XDebugProcess;
 import com.intellij.xdebugger.XDebugProcessStarter;
 import com.intellij.xdebugger.XDebugSession;
 import com.intellij.xdebugger.XDebuggerManager;
-import com.reason.ide.debug.conf.OClApplicationConfiguration;
+import com.reason.ide.debug.conf.OclRunConfiguration;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class OClDebugRunner extends GenericProgramRunner {
+public class OclProgramRunner extends GenericProgramRunner {
 
-    private static final String OCAML_DEBUG_RUNNER_ID = "OcamlDebugRunner";
+    private static final String OCAML_DEBUG_RUNNER_ID = "OclProgramRunner";
 
     @NotNull
     @Override
@@ -28,7 +28,7 @@ public class OClDebugRunner extends GenericProgramRunner {
 
     @Override
     public boolean canRun(@NotNull String executorId, @NotNull RunProfile profile) {
-        return DefaultDebugExecutor.EXECUTOR_ID.equals(executorId) && (profile instanceof OClApplicationConfiguration);
+        return DefaultDebugExecutor.EXECUTOR_ID.equals(executorId) && (profile instanceof OclRunConfiguration);
     }
 
     @Nullable

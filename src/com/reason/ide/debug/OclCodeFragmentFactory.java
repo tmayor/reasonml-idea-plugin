@@ -1,12 +1,10 @@
-package com.reason.lang;
+package com.reason.ide.debug;
 
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.PsiType;
-import com.reason.lang.core.ORElementFactory;
-import com.reason.lang.ocaml.OclLanguage;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,6 +20,6 @@ public class OclCodeFragmentFactory {
     }
 
     public PsiFile createExpressionCodeFragment(@NotNull String text, @Nullable PsiElement context, @Nullable PsiType expectedType, boolean isPhysical) {
-        return ORElementFactory.createFileFromText(m_project, OclLanguage.INSTANCE, text);
+        return null; //return Factory.createFileFromText(m_project, OclLanguage.INSTANCE, text);
     }
 }

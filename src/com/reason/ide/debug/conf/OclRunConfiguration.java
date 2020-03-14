@@ -1,6 +1,5 @@
 package com.reason.ide.debug.conf;
 
-import com.intellij.execution.ExecutionException;
 import com.intellij.execution.Executor;
 import com.intellij.execution.configurations.ConfigurationType;
 import com.intellij.execution.configurations.ModuleBasedConfiguration;
@@ -23,11 +22,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
 
-public class OClApplicationConfiguration extends ModuleBasedConfiguration<OClModuleBasedConfiguration, PsiModule> {
+public class OclRunConfiguration extends ModuleBasedConfiguration<OClModuleBasedConfiguration, PsiModule> {
 
     private String m_workDirectory;
 
-    OClApplicationConfiguration(Project project, String name, ConfigurationType configurationType) {
+    OclRunConfiguration(Project project, ConfigurationType configurationType, String name) {
         super(name, new OClModuleBasedConfiguration(project), configurationType.getConfigurationFactories()[0]);
     }
 

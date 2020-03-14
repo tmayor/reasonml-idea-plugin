@@ -6,7 +6,6 @@ import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiFile;
 import com.intellij.xdebugger.evaluation.XDebuggerEditorsProviderBase;
 import com.reason.ide.files.OclFileType;
-import com.reason.lang.OclCodeFragmentFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
