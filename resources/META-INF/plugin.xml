@@ -328,11 +328,18 @@
         <xdebugger.breakpointType implementation="com.reason.ide.debug.ORLineBreakpointType"/>
 
         <!--
-         | UI
+         | Consoles
          -->
 
         <toolWindow id="Bucklescript" anchor="bottom" icon="/icons/bucklescript.png"
                     factoryClass="com.reason.ide.console.BsToolWindowFactory"/>
+
+        <toolWindow id="Esy" anchor="bottom" icon="/icons/esy.png"
+                    factoryClass="com.reason.ide.console.EsyToolWindowFactory"/>
+
+        <!--
+         | Misc UI
+         -->
 
         <codeInsight.parameterInfo language="Reason"
                                    implementationClass="com.reason.ide.hints.ORParameterInfoHandlerWithTabActionSupport"/>
