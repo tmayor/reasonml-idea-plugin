@@ -4,9 +4,7 @@ import com.intellij.facet.Facet;
 import com.intellij.facet.FacetManager;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.graph.layout.planar.Face;
 import com.intellij.openapi.module.Module;
-import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -16,7 +14,6 @@ import com.reason.esy.EsyCompiler;
 import com.reason.ide.ORNotification;
 import com.reason.ide.console.CliType;
 import com.reason.ide.facet.DuneFacet;
-import com.reason.ide.facet.DuneFacetConfiguration;
 import com.reason.ide.facet.EsyFacet;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -69,8 +66,9 @@ class CompilerProvider {
 
             if (facet instanceof EsyFacet) {
                 EsyFacet esyFacet = (EsyFacet) facet;
-                esyFacet.isSetup();
-                // @TODO not setup...
+                if (!esyFacet.isSetupValid()) {
+                    return DUMMY_COMPILER;
+                }
                 return EsyCompiler.getInstance(project);
             }
 

@@ -10,12 +10,13 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.reason.compiler.Compiler.ProcessTerminated;
-import com.reason.compiler.CompilerProcess;
 import com.reason.Log;
 import com.reason.Platform;
+import com.reason.compiler.Compiler.ProcessTerminated;
+import com.reason.compiler.CompilerProcess;
 import com.reason.ide.ORNotification;
 import com.reason.ide.console.CliType;
+import org.jetbrains.annotations.Nls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -37,9 +38,16 @@ public class EsyProcess implements CompilerProcess {
   public static final String ESY_EXECUTABLE_NAME = "esy";
   public static final String WINDOWS_EXECUTABLE_SUFFIX =  ".exe";
 
+  @Nls
   private static final Runnable SHOW_ESY_NOT_FOUND_NOTIFICATION =
       () -> Notifications.Bus.notify(new ORNotification("Esy Missing", "Unable to find esy executable in system PATH.", ERROR));
 
+  @Nls
+  private static final Runnable SHOW_ESY_PROJECT_NOT_FOUND_NOTIFICATION =
+          () -> Notifications.Bus.notify(new ORNotification("Esy Project Not Found", "Unable to find esy project. " +
+                  "Have you run esy yet?", ERROR));
+
+  @Nls
   private static final Consumer<Exception> SHOW_EXEC_EXCEPTION_NOTIFICATION =
       (e) -> Notifications.Bus.notify(new ORNotification("Esy Exception", "Failed to execute esy command.\n" + e.getMessage(), ERROR));
 
@@ -95,16 +103,21 @@ public class EsyProcess implements CompilerProcess {
 
   private EsyProcess(@NotNull Project project) {
     FileSystem fileSystem = FileSystems.getDefault();
-    VirtualFile esyContentRoot = Platform.findOREsyContentRoot(project);
-    Path esyExecutable = findExecutableInPath(ESY_EXECUTABLE_NAME, System.getenv("PATH"))
-        .orElseThrow(() -> {
-          SHOW_ESY_NOT_FOUND_NOTIFICATION.run();
-          return esyNotFoundException();
-        });
-    this.workingDir = fileSystem.getPath(esyContentRoot.getPath());
-    this.esyExecutable = esyExecutable;
+    VirtualFile esyContentRoot = findEsyContentRoot(project);
+    // @TODO better defaulting for esy root
+    String esyRootAsString = esyContentRoot == null ? "" : esyContentRoot.getPath();
+    this.workingDir = fileSystem.getPath(esyRootAsString);
+    this.esyExecutable = findEsyExecutableInPath();
     this.redirectErrors = true;
     this.started = new AtomicBoolean(false);
+  }
+
+  public static Path findEsyExecutableInPath() {
+    return findExecutableInPath(ESY_EXECUTABLE_NAME, System.getenv("PATH"))
+            .orElseThrow(() -> {
+              SHOW_ESY_NOT_FOUND_NOTIFICATION.run();
+              return esyNotFoundException();
+            });
   }
 
   public boolean isStarted() {
@@ -211,5 +224,14 @@ public class EsyProcess implements CompilerProcess {
     }
     File exeFile = PathEnvironmentVariableUtil.findInPath(filename, shellPath, null);
     return exeFile == null ? Optional.empty() : Optional.of(exeFile.toPath());
+  }
+
+  @Nullable
+  private static VirtualFile findEsyContentRoot(@NotNull Project project) {
+    VirtualFile esyContentRoot = Platform.findOREsyContentRoot(project);
+    if (esyContentRoot == null) {
+      SHOW_ESY_NOT_FOUND_NOTIFICATION.run();
+    }
+    return esyContentRoot;
   }
 }

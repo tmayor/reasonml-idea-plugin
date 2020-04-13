@@ -6,6 +6,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.*;
+
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
@@ -22,9 +23,9 @@ public class Platform {
 
     public static final String LOCAL_BS_PLATFORM = "/node_modules/bs-platform";
     public static final String LOCAL_NODE_MODULES_BIN = "/node_modules/.bin";
-    public static final String DUNE_NAME = "dune-project";
-    public static final String PACKAGE_JSON_NAME = "package.json";
-    public static final String ESY_PROJECT_IDENTIFIER = "_esy";
+    public static final String DUNE_PROJECT_IDENTIFIER_FILE = "dune-project";
+    public static final String BS_PROJECT_IDENTIFIER_FILE = "package.json";
+    public static final String ESY_PROJECT_IDENTIFIER_FILE = "_esy";
     public static final String BSCONFIG_JSON_NAME = "bsconfig.json";
     public static final Charset UTF8 = StandardCharsets.UTF_8;
 
@@ -60,23 +61,6 @@ public class Platform {
         return plugin == null ? null : plugin.getPath();
     }
 
-    @NotNull
-    private static Map<Module, VirtualFile> findContentRootsFor(@NotNull Project project, @NotNull String filename) {
-        Map<Module, VirtualFile> rootContents = new HashMap<>();
-
-        ModuleManager moduleManager = ModuleManager.getInstance(project);
-        for (Module module : moduleManager.getModules()) {
-            for (VirtualFile contentRoot : ModuleRootManager.getInstance(module).getContentRoots()) {
-                VirtualFile packageJson = contentRoot.findChild(filename);
-                if (packageJson != null && !rootContents.containsKey(module)) {
-                    rootContents.put(module, packageJson);
-                }
-            }
-        }
-
-        return rootContents;
-    }
-
     public static VirtualFile findContentRootFor(@NotNull Project project, @NotNull String filename) {
         Map<Module, VirtualFile> rootContents = findContentRootsFor(project, filename);
 
@@ -95,17 +79,31 @@ public class Platform {
         }
     }
 
-    public static VirtualFile findORDuneContentRoot(@NotNull Project project) {
-        return findContentRootFor(project, DUNE_NAME);
+    public static boolean isDuneModule(@NotNull Module module) {
+        return isFileInModule(DUNE_PROJECT_IDENTIFIER_FILE, module);
     }
 
+    public static boolean isEsyModule(@NotNull Module module) {
+        return isFileInModule(ESY_PROJECT_IDENTIFIER_FILE, module);
+    }
+
+    public static boolean isBsModule(@NotNull Module module) {
+        return isFileInModule(BS_PROJECT_IDENTIFIER_FILE, module);
+    }
+
+    @Nullable
+    public static VirtualFile findORDuneContentRoot(@NotNull Project project) {
+        return findContentRootFor(project, DUNE_PROJECT_IDENTIFIER_FILE);
+    }
+
+    @Nullable
     public static VirtualFile findOREsyContentRoot(@NotNull Project project) {
-        return findContentRootFor(project, ESY_PROJECT_IDENTIFIER);
+        return findContentRootFor(project, ESY_PROJECT_IDENTIFIER_FILE);
     }
 
     @Nullable
     public static VirtualFile findORPackageJsonContentRoot(@NotNull Project project) {
-        return findContentRootFor(project, PACKAGE_JSON_NAME);
+        return findContentRootFor(project, BS_PROJECT_IDENTIFIER_FILE);
     }
 
     @Nullable
@@ -177,5 +175,30 @@ public class Platform {
             }
         }
         return null;
+    }
+
+    @NotNull
+    private static Map<Module, VirtualFile> findContentRootsFor(@NotNull Project project, @NotNull String filename) {
+        Map<Module, VirtualFile> rootContents = new HashMap<>();
+        ModuleManager moduleManager = ModuleManager.getInstance(project);
+        for (Module module : moduleManager.getModules()) {
+            Optional<VirtualFile> file = findFileInModule(filename, module);
+            file.ifPresent(virtualFile -> rootContents.put(module, virtualFile));
+        }
+        return rootContents;
+    }
+
+    private static boolean isFileInModule(@NotNull  String filename, @NotNull  Module module) {
+        return findFileInModule(filename, module).isPresent();
+    }
+
+    private static Optional<VirtualFile> findFileInModule(@NotNull String filename, @NotNull Module module) {
+        for (VirtualFile contentRoot : ModuleRootManager.getInstance(module).getContentRoots()) {
+            VirtualFile file = contentRoot.findChild(filename);
+            if (file != null) {
+                return Optional.of(file);
+            }
+        }
+        return Optional.empty();
     }
 }
