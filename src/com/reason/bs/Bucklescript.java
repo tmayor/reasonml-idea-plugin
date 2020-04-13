@@ -1,10 +1,9 @@
 package com.reason.bs;
 
-import java.util.*;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.reason.Compiler;
+import com.reason.compiler.Compiler;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

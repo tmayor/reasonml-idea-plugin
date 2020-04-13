@@ -1,4 +1,4 @@
-package com.reason;
+package com.reason.compiler;
 
 import org.jetbrains.annotations.NotNull;
 import com.intellij.execution.process.ProcessAdapter;

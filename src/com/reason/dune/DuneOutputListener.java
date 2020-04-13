@@ -14,7 +14,7 @@ import com.intellij.openapi.editor.EditorFactory;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.reason.CompilerProcess;
+import com.reason.compiler.CompilerProcess;
 import com.reason.Platform;
 import com.reason.ide.annotations.ErrorsManager;
 import com.reason.ide.annotations.OutputInfo;

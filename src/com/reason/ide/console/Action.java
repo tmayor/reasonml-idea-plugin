@@ -8,6 +8,9 @@ import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.DumbAwareAction;
 import org.jetbrains.annotations.NotNull;
 
+/**
+ *  Actions shared across consoles types.
+ */
 public class Action {
 
     static class ClearLogAction extends DumbAwareAction {

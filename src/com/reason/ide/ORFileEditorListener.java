@@ -1,5 +1,6 @@
 package com.reason.ide;
 
+import com.intellij.facet.FacetManager;
 import com.intellij.openapi.Disposable;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.editor.Document;
@@ -8,13 +9,17 @@ import com.intellij.openapi.editor.event.DocumentEvent;
 import com.intellij.openapi.editor.event.DocumentListener;
 import com.intellij.openapi.fileEditor.*;
 import com.intellij.openapi.fileTypes.FileType;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
+import com.intellij.openapi.module.ModuleUtil;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.util.containers.WeakList;
+import com.reason.compiler.Compiler;
+import com.reason.compiler.CompilerManager;
 import com.reason.hints.InsightManager;
 import com.reason.hints.InsightUpdateQueue;
-import com.reason.ide.console.CliType;
 import com.reason.ide.files.FileHelper;
 import com.reason.ide.hints.CodeLensView;
 import com.reason.ide.hints.InferredTypesService;
@@ -100,11 +105,13 @@ public class ORFileEditorListener implements FileEditorManagerListener {
         private final VirtualFile m_file;
         private final Document m_document;
         private final InsightUpdateQueue m_updateQueue;
+        private final Compiler m_compiler;
 
         ORPropertyChangeListener(@NotNull VirtualFile file, @NotNull Document document, @NotNull InsightUpdateQueue insightUpdateQueue) {
             m_file = file;
             m_document = document;
             m_updateQueue = insightUpdateQueue;
+            m_compiler = CompilerManager.getInstance(m_project).getCompiler(file);
         }
 
         @Override
@@ -115,7 +122,7 @@ public class ORFileEditorListener implements FileEditorManagerListener {
         public void propertyChange(@NotNull PropertyChangeEvent evt) {
             if ("modified".equals(evt.getPropertyName()) && evt.getNewValue() == Boolean.FALSE) {
                 // Document is saved, run the compiler !!
-                CompilerManager.getInstance().getCompiler(m_project).run(m_file, () -> m_updateQueue.queue(m_project, m_document));
+                m_compiler.run(m_file, () -> m_updateQueue.queue(m_project, m_document));
 
                 //() -> ApplicationManager.getApplication().runReadAction(() -> {
                 //InferredTypesService.clearTypes(m_project, m_file);

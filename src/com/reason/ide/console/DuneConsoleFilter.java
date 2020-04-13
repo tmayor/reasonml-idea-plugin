@@ -33,7 +33,7 @@ class DuneConsoleFilter implements Filter {
             VirtualFile virtualFile = LocalFileSystem.getInstance().refreshAndFindFileByPath(filePath);
             if (virtualFile != null) {
                 return new Result(startPoint + matcher.start(1), entireLength,
-                                  new OpenFileHyperlinkInfo(m_project, virtualFile, parseInt(matcher.group(2)) - 1, parseInt(matcher.group(3)) - 1));
+                        new OpenFileHyperlinkInfo(m_project, virtualFile, parseInt(matcher.group(2)) - 1, parseInt(matcher.group(3)) - 1));
             }
         }
         return null;

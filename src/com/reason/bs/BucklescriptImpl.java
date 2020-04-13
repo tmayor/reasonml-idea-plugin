@@ -24,7 +24,7 @@ import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
 import com.reason.FileUtil;
 import com.reason.Platform;
-import com.reason.ProcessFinishedListener;
+import com.reason.compiler.ProcessFinishedListener;
 import com.reason.hints.InsightManager;
 import com.reason.ORNotification;
 import com.reason.ide.console.CliType;

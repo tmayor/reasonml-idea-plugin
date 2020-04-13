@@ -9,8 +9,10 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
-import com.reason.Compiler;
+import com.reason.compiler.Compiler;
 import com.reason.*;
+import com.reason.compiler.CompilerProcess;
+import com.reason.compiler.ProcessFinishedListener;
 import com.reason.hints.InsightManager;
 import com.reason.ide.console.CliType;
 import org.jetbrains.annotations.NotNull;
@@ -29,9 +31,8 @@ public class DuneCompiler implements Compiler {
         return ServiceManager.getService(project, DuneCompiler.class);
     }
 
-    DuneCompiler(@NotNull Project project) {
-        m_project = project;
-        LOG.info("Created dune compiler instance.");
+    DuneCompiler(@NotNull Project m_project) {
+        this.m_project = m_project;
     }
 
     @Nullable

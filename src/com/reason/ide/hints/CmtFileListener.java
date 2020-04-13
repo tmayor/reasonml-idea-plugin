@@ -8,12 +8,12 @@ import com.intellij.lang.Language;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.reason.Compiler;
+import com.reason.compiler.Compiler;
 import com.reason.Log;
 import com.reason.Platform;
 import com.reason.bs.Bucklescript;
 import com.reason.hints.InsightManager;
-import com.reason.ide.CompilerManager;
+import com.reason.compiler.CompilerManager;
 import com.reason.ide.FileManager;
 import com.reason.ide.OREditorTracker;
 import com.reason.ide.files.FileHelper;
@@ -34,7 +34,7 @@ public class CmtFileListener {
     public void onChange(@NotNull VirtualFile file) {
         Path relativeCmt;
 
-        Compiler compiler = CompilerManager.getInstance().getCompiler(m_project);
+        Compiler compiler = CompilerManager.getInstance().getCompiler(file, m_project);
         if (compiler instanceof Bucklescript) {
             Path relativeRoot = FileSystems.getDefault().getPath("lib", "bs");
             VirtualFile baseRoot = Platform.findORPackageJsonContentRoot(m_project);

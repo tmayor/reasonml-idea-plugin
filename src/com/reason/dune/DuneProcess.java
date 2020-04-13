@@ -5,9 +5,6 @@ import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.util.*;
 import java.util.concurrent.atomic.*;
-
-import com.reason.ORNotification;
-import com.reason.sdk.OCamlSdkType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 import com.intellij.execution.ExecutionException;
@@ -22,9 +19,11 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.reason.Compiler;
-import com.reason.CompilerProcess;
+import com.reason.compiler.Compiler;
+import com.reason.compiler.CompilerProcess;
+import com.reason.OCamlSdkType;
 import com.reason.Platform;
+import com.reason.ide.ORNotification;
 import com.reason.ide.console.CliType;
 
 import static com.intellij.notification.NotificationListener.URL_OPENING_LISTENER;

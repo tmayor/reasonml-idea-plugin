@@ -1,4 +1,4 @@
-package com.reason;
+package com.reason.compiler;
 
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;

@@ -8,7 +8,7 @@ import com.intellij.execution.process.AnsiEscapeDecoder;
 import com.intellij.execution.process.KillableProcessHandler;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.util.SystemInfo;
-import com.reason.Compiler;
+import com.reason.compiler.Compiler;
 
 class BsProcessHandler extends KillableProcessHandler implements AnsiEscapeDecoder.ColoredTextAcceptor {
 

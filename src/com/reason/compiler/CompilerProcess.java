@@ -1,4 +1,4 @@
-package com.reason;
+package com.reason.compiler;
 
 import com.intellij.execution.process.ProcessHandler;
 import com.reason.ide.console.CliType;
