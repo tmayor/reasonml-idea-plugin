@@ -33,7 +33,7 @@ abstract class CompilerAction extends DumbAwareAction {
     }
 
     void doAction(@NotNull Project project, @NotNull CliType cliType) {
-        Compiler compiler = CompilerManager.getInstance().getCompiler(file, project);
+        Compiler compiler = CompilerManager.getInstance(project).getCompiler(file);
 
         // Try to detect the current active editor
         Editor editor = FileEditorManager.getInstance(project).getSelectedTextEditor();

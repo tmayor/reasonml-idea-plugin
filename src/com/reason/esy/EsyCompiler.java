@@ -68,8 +68,7 @@ public class EsyCompiler implements Compiler {
     }
 
     private ConsoleView getConsoleView() {
-        ToolWindow toolWindow = ToolWindowManager.getInstance(project)
-            .getToolWindow(EsyToolWindowFactory.ESY_TOOL_WINDOW);
+        ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(EsyToolWindowFactory.IDENTIFIER);
         Content windowContent = toolWindow.getContentManager().getContent(0);
         if (windowContent == null) {
             throw new EsyCompilerException("Unable to retrieve content from tool window.");

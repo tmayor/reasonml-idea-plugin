@@ -353,11 +353,11 @@
          | Consoles
          -->
 
-        <toolWindow id="Bucklescript" anchor="bottom" icon="/icons/bucklescript.png"
+        <toolWindow id="bs-tool-window" anchor="bottom" icon="/icons/bucklescript.png"
                     factoryClass="com.reason.ide.console.BsToolWindowFactory"/>
-        <toolWindow id="Dune" anchor="bottom" icon="/icons/dune.png"
+        <toolWindow id="dune-tool-window" anchor="bottom" icon="/icons/dune.png"
                     factoryClass="com.reason.ide.console.DuneToolWindowFactory"/>
-        <toolWindow id="Esy" anchor="bottom" icon="/icons/esy.png"
+        <toolWindow id="esy-tool-window" anchor="bottom" icon="/icons/esy.png"
                     factoryClass="com.reason.ide.console.EsyToolWindowFactory"/>
 
         <!--

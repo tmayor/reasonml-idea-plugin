@@ -1,23 +1,30 @@
 package com.reason.ide.console;
 
+import com.intellij.facet.FacetTypeId;
 import com.intellij.openapi.actionSystem.ActionManager;
 import com.intellij.openapi.actionSystem.ActionToolbar;
 import com.intellij.openapi.actionSystem.DefaultActionGroup;
 import com.intellij.openapi.editor.actions.ScrollToTheEndToolbarAction;
-import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.ui.SimpleToolWindowPanel;
 import com.intellij.openapi.util.Disposer;
 import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowFactory;
 import com.intellij.ui.content.Content;
 import com.intellij.ui.content.ContentFactory;
+import com.reason.Icons;
+import com.reason.ide.facet.DuneFacet;
 import org.jetbrains.annotations.NotNull;
 
-public class DuneToolWindowFactory implements ToolWindowFactory, DumbAware {
+public class DuneToolWindowFactory extends ORToolWindowFactory {
+
+    public static final String IDENTIFIER = "dune-tool-window";
 
     @Override
-    public void createToolWindowContent(@NotNull final Project project, @NotNull ToolWindow duneWindow) {
+    public void createToolWindowContent(@NotNull final Project project, @NotNull ToolWindow window) {
+        window.setIcon(Icons.DUNE_TOOL);
+        window.setStripeTitle("Dune");
+        window.setTitle("Process");
+
         SimpleToolWindowPanel panel = new SimpleToolWindowPanel(false, true);
 
         DuneConsole console = new DuneConsole(project);
@@ -28,9 +35,14 @@ public class DuneToolWindowFactory implements ToolWindowFactory, DumbAware {
 
         Content content = ContentFactory.SERVICE.getInstance().createContent(panel, "", true);
 
-        duneWindow.getContentManager().addContent(content);
+        window.getContentManager().addContent(content);
 
         Disposer.register(project, console);
+    }
+
+    @Override
+    FacetTypeId<?> getAssociatedFacet() {
+        return DuneFacet.ID;
     }
 
     @NotNull
@@ -44,7 +56,6 @@ public class DuneToolWindowFactory implements ToolWindowFactory, DumbAware {
 
         ActionToolbar toolbar = ActionManager.getInstance().createActionToolbar("left", group, false);
         toolbar.setTargetComponent(console.getComponent());
-
         return toolbar;
     }
 }
