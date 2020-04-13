@@ -4,9 +4,9 @@ import com.intellij.execution.impl.ConsoleViewImpl;
 import com.intellij.openapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 
-class BsConsole extends ConsoleViewImpl {
+class DuneConsole extends ConsoleViewImpl {
 
-    BsConsole(@NotNull Project project) {
+    DuneConsole(@NotNull Project project) {
         super(project, true);
     }
 }

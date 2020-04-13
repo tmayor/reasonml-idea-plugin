@@ -44,7 +44,7 @@ public final class BsProcess implements CompilerProcess {
 
     public BsProcess(@NotNull Project project) {
         m_project = project;
-        create(Platform.findProjectBsconfig(project), CliType.make, null);
+        create(Platform.findProjectBsconfig(project), CliType.Bs.MAKE, null);
     }
 
     // Wait for the tool window to be ready before starting the process
@@ -59,7 +59,8 @@ public final class BsProcess implements CompilerProcess {
         }
     }
 
-    private void create(@Nullable VirtualFile sourceFile, @NotNull CliType cliType, @Nullable Compiler.ProcessTerminated onProcessTerminated) {
+    private void create(@Nullable VirtualFile sourceFile, @NotNull CliType.Bs cliType,
+            @Nullable Compiler.ProcessTerminated onProcessTerminated) {
         try {
             if (sourceFile != null) {
                 createProcessHandler(sourceFile, cliType, onProcessTerminated);
@@ -75,7 +76,8 @@ public final class BsProcess implements CompilerProcess {
     }
 
     @Nullable
-    public ProcessHandler recreate(@NotNull VirtualFile sourceFile, @NotNull CliType cliType, @Nullable Compiler.ProcessTerminated onProcessTerminated) {
+    public ProcessHandler recreate(@NotNull VirtualFile sourceFile, @NotNull CliType.Bs cliType,
+            @Nullable Compiler.ProcessTerminated onProcessTerminated) {
         try {
             return createProcessHandler(sourceFile, cliType, onProcessTerminated);
         } catch (ExecutionException e) {
@@ -86,7 +88,7 @@ public final class BsProcess implements CompilerProcess {
     }
 
     @Nullable
-    private ProcessHandler createProcessHandler(@NotNull VirtualFile sourceFile, @NotNull CliType cliType,
+    private ProcessHandler createProcessHandler(@NotNull VirtualFile sourceFile, @NotNull CliType.Bs cliType,
                                                 @Nullable Compiler.ProcessTerminated onProcessTerminated) throws ExecutionException {
         killIt();
         GeneralCommandLine cli = getGeneralCommandLine(sourceFile, cliType);
@@ -116,7 +118,8 @@ public final class BsProcess implements CompilerProcess {
     }
 
     @Nullable
-    private GeneralCommandLine getGeneralCommandLine(@NotNull VirtualFile sourceFile, @NotNull CliType cliType) {
+    private GeneralCommandLine getGeneralCommandLine(@NotNull VirtualFile sourceFile,
+            @NotNull CliType.Bs cliType) {
         String bsbPath = getBsbPath(m_project, sourceFile);
         if (bsbPath == null) {
             Notifications.Bus.notify(new ORNotification("Bsb", "<html>Can't find bsb.\n" + "The working directory is '" + ReasonSettings.getInstance(m_project)
@@ -127,10 +130,10 @@ public final class BsProcess implements CompilerProcess {
 
         GeneralCommandLine cli;
         switch (cliType) {
-            case make:
+            case MAKE:
                 cli = new GeneralCommandLine(bsbPath, "-make-world");
                 break;
-            case cleanMake:
+            case CLEAN_MAKE:
                 cli = new GeneralCommandLine(bsbPath, "-clean-world", "-make-world");
                 break;
             default:

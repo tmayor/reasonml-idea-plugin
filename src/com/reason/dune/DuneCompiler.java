@@ -46,30 +46,26 @@ public class DuneCompiler implements Compiler {
     }
 
     @Override
+    public void run(@NotNull VirtualFile file, @Nullable Compiler.ProcessTerminated onProcessTerminated) {
+        run(file, CliType.Dune.BUILD, onProcessTerminated);
+    }
+
+    @Override
     public void run(@NotNull VirtualFile file, @NotNull CliType cliType, @Nullable Compiler.ProcessTerminated onProcessTerminated) {
-        if (!(cliType instanceof CliType.Dune)) {
-            throw new IllegalArgumentException("Invalid cliType for dune compiler.");
-        }
-        CliType.Dune duneCliType = (CliType.Dune) cliType;
-        if (duneCliType == CliType.Dune.CLEAN_MAKE) {
-            run(file, CliType.Dune.CLEAN, () ->
-                run(file, CliType.Dune.MAKE, onProcessTerminated));
-        } else {
-            CompilerProcess process = DuneProcess.getInstance(m_project);
-            if (process.start()) {
-                ProcessHandler duneHandler = process.recreate(cliType, onProcessTerminated);
-                if (duneHandler != null) {
-                    ConsoleView console = getConsoleView();
-                    if (console != null) {
-                        long start = System.currentTimeMillis();
-                        console.attachToProcess(duneHandler);
-                        duneHandler.addProcessListener(new ProcessFinishedListener(start));
-                    }
-                    process.startNotify();
-                    ServiceManager.getService(m_project, InsightManager.class).downloadRincewindIfNeeded(file);
-                } else {
-                    process.terminate();
+        CompilerProcess process = DuneProcess.getInstance(m_project);
+        if (process.start()) {
+            ProcessHandler duneHandler = process.recreate(cliType, onProcessTerminated);
+            if (duneHandler != null) {
+                ConsoleView console = getConsoleView();
+                if (console != null) {
+                    long start = System.currentTimeMillis();
+                    console.attachToProcess(duneHandler);
+                    duneHandler.addProcessListener(new ProcessFinishedListener(start));
                 }
+                process.startNotify();
+                ServiceManager.getService(m_project, InsightManager.class).downloadRincewindIfNeeded(file);
+            } else {
+                process.terminate();
             }
         }
     }

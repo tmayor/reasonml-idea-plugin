@@ -1,6 +1,8 @@
 package com.reason.ide.console;
 
 import javax.swing.*;
+
+import com.intellij.openapi.actionSystem.AnActionEvent;
 import org.jetbrains.annotations.NotNull;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.execution.ui.ConsoleViewContentType;
@@ -20,6 +22,13 @@ import com.reason.ide.CompilerManager;
 
 abstract class CompilerAction extends DumbAwareAction {
 
+    public static void doAction (@NotNull AnActionEvent event, CliType cliType, CompilerAction action) {
+        Project project = event.getProject();
+        if (project != null) {
+            action.doAction(project, cliType);
+        }
+    }
+
     CompilerAction(@NotNull String text, @NotNull String description, @NotNull Icon icon) {
         super(text, description, icon);
     }
@@ -36,7 +45,8 @@ abstract class CompilerAction extends DumbAwareAction {
                 if (baseDir == null) {
                     console.print("Can't find content root\n", ConsoleViewContentType.NORMAL_OUTPUT);
                 } else {
-                    console.print("No active text editor found, using root directory " + baseDir.getPath() + "\n", ConsoleViewContentType.NORMAL_OUTPUT);
+                    console.print("No active text editor found, using root directory " + baseDir.getPath() + "\n",
+                           ConsoleViewContentType.NORMAL_OUTPUT);
                     compiler.run(baseDir, cliType, null);
                 }
             }

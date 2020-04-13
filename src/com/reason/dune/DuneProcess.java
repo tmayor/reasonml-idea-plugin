@@ -66,7 +66,7 @@ public final class DuneProcess implements CompilerProcess {
     public ProcessHandler recreate(@NotNull CliType cliType, @Nullable Compiler.ProcessTerminated onProcessTerminated) {
         try {
             killIt();
-            GeneralCommandLine cli = getGeneralCommandLine(cliType);
+            GeneralCommandLine cli = getGeneralCommandLine((CliType.Dune) cliType);
             if (cli != null) {
                 m_processHandler = new KillableColoredProcessHandler(cli);
                 m_processHandler.addProcessListener(m_outputListener);
@@ -95,7 +95,7 @@ public final class DuneProcess implements CompilerProcess {
     }
 
     @Nullable
-    private GeneralCommandLine getGeneralCommandLine(CliType cliType) {
+    private GeneralCommandLine getGeneralCommandLine(CliType.Dune cliType) {
         Sdk odk = OCamlSdkType.getSDK(m_project);
         if (odk == null) {
             Notifications.Bus.notify(new ORNotification("Dune", "<html>Can't find sdk.\n"
@@ -115,9 +115,12 @@ public final class DuneProcess implements CompilerProcess {
         String duneBinary = fileSystem.getPath(odk.getHomePath(), "bin", "dune" + (Platform.isWindows() ? ".exe" : "")).toString();
         GeneralCommandLine cli;
         switch (cliType) {
-            case clean:
+            case CLEAN:
                 cli = new GeneralCommandLine(duneBinary, "clean");
                 break;
+            case INSTALL:
+                cli = new GeneralCommandLine(duneBinary, "install");
+            case BUILD:
             default:
                 cli = new GeneralCommandLine(duneBinary, "build");
         }

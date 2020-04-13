@@ -18,11 +18,33 @@
     <depends optional="true" config-file="js-deps.xml">JavaScript</depends>
 
     <actions>
+        <!-- BuckleScript -->
+
         <!--suppress PluginXmlCapitalization -->
-        <action id="reason.actions.make" class="com.reason.ide.console.MakeAction" text="Bsb -make"/>
+        <action id="bs.actions.make" class="com.reason.ide.console.BsAction$Make" text="bsb -make"/>
         <!--suppress PluginXmlCapitalization -->
-        <action id="reason.actions.makeWorld" class="com.reason.ide.console.MakeWorldAction"
-                text="bsb -clean-world -make-world"/>
+        <action id="bs.actions.makeWorld" class="com.reason.ide.console.BsAction$CleanMake" text="bsb -clean-world -make-world"/>
+
+        <!-- Dune -->
+
+        <!--suppress PluginXmlCapitalization -->
+        <action id="dune.actions.build" class="com.reason.ide.console.DuneAction$Build" text="dune build"/>
+        <!--suppress PluginXmlCapitalization -->
+        <action id="dune.actions.clean" class="com.reason.ide.console.DuneAction$Clean" text="dune clean"/>
+        <!--suppress PluginXmlCapitalization -->
+        <action id="dune.actions.install" class="com.reason.ide.console.DuneAction$Install" text="dune install"/>
+
+        <!-- Esy -->
+
+        <!--suppress PluginXmlCapitalization -->
+        <action id="esy.actions.install" class="com.reason.ide.console.EsyAction$Install" text="esy install"/>
+        <!--suppress PluginXmlCapitalization -->
+        <action id="esy.actions.build" class="com.reason.ide.console.EsyAction$Build" text="esy build"/>
+        <!--suppress PluginXmlCapitalization -->
+        <action id="esy.actions.shell" class="com.reason.ide.console.EsyAction$Shell" text="esy shell"/>
+
+        <!-- Shared -->
+
         <!--suppress PluginXmlCapitalization -->
         <action id="reason.actions.refmt" class="com.reason.ide.actions.ReformatAction" text="Reformat code (refmt)">
             <add-to-group group-id="CodeFormatGroup" anchor="after" relative-to-action="ReformatCode"/>
@@ -333,7 +355,8 @@
 
         <toolWindow id="Bucklescript" anchor="bottom" icon="/icons/bucklescript.png"
                     factoryClass="com.reason.ide.console.BsToolWindowFactory"/>
-
+        <toolWindow id="Dune" anchor="bottom" icon="/icons/dune.png"
+                    factoryClass="com.reason.ide.console.DuneToolWindowFactory"/>
         <toolWindow id="Esy" anchor="bottom" icon="/icons/esy.png"
                     factoryClass="com.reason.ide.console.EsyToolWindowFactory"/>
 

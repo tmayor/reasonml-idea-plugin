@@ -75,7 +75,7 @@ public class BucklescriptImpl implements Bucklescript {
                 getOrRefreshBsConfig(bsconfigFile);
                 BsProcess process = ServiceManager.getService(m_project, BsProcess.class);
                 if (process.start()) {
-                    ProcessHandler bscHandler = process.recreate(sourceFile, cliType, onProcessTerminated);
+                    ProcessHandler bscHandler = process.recreate(sourceFile, (CliType.Bs) cliType, onProcessTerminated);
                     if (bscHandler != null) {
                         ConsoleView console = getBsbConsole();
                         if (console != null) {

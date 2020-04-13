@@ -18,6 +18,10 @@ public interface Compiler {
 
     void refresh(@NotNull VirtualFile configFile);
 
+    /* runs whenever the file is modified. should run `build`, `make`, or similar */
+    void run(@NotNull VirtualFile file, @Nullable ProcessTerminated onProcessTerminated);
+
+    /* runs the compiler with a command specified by `cliType` */
     void run(@NotNull VirtualFile file, @NotNull CliType cliType, @Nullable ProcessTerminated onProcessTerminated);
 
 }

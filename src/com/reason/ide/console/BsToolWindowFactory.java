@@ -37,14 +37,13 @@ public class BsToolWindowFactory implements ToolWindowFactory, DumbAware {
     private ActionToolbar createToolbar(@NotNull BsConsole console) {
         DefaultActionGroup group = new DefaultActionGroup();
         group.add(new ScrollToTheEndToolbarAction(console.getEditor()));
-        group.add(new ClearLogAction(console));
-        group.add(new MakeAction());
-        group.add(new MakeWorldAction());
+        group.add(new Action.ClearLogAction(console));
+        group.add(new BsAction.Make());
+        group.add(new BsAction.CleanMake());
 
         ActionToolbar toolbar = ActionManager.getInstance().createActionToolbar("left", group, false);
         toolbar.setTargetComponent(console.getComponent());
 
         return toolbar;
     }
-
 }
