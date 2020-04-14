@@ -9,12 +9,14 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
+import com.reason.Log;
+import com.reason.Platform;
 import com.reason.compiler.Compiler;
-import com.reason.*;
 import com.reason.compiler.CompilerProcess;
 import com.reason.compiler.ProcessFinishedListener;
 import com.reason.hints.InsightManager;
 import com.reason.ide.console.CliType;
+import com.reason.ide.console.DuneToolWindowFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -25,19 +27,19 @@ public class DuneCompiler implements Compiler {
     private static final Log LOG = Log.create("dune.compiler");
 
     @NotNull
-    private final Project m_project;
+    private final Project project;
 
     public static Compiler getInstance(@NotNull Project project) {
         return ServiceManager.getService(project, DuneCompiler.class);
     }
 
-    DuneCompiler(@NotNull Project m_project) {
-        this.m_project = m_project;
+    DuneCompiler(@NotNull Project project) {
+        this.project = project;
     }
 
     @Nullable
     @Override
-    public VirtualFile findContentRoot(@NotNull Project project) {
+    public VirtualFile findContentRoot() {
         return Platform.findORDuneContentRoot(project);
     }
 
@@ -53,7 +55,7 @@ public class DuneCompiler implements Compiler {
 
     @Override
     public void run(@NotNull VirtualFile file, @NotNull CliType cliType, @Nullable Compiler.ProcessTerminated onProcessTerminated) {
-        CompilerProcess process = DuneProcess.getInstance(m_project);
+        CompilerProcess process = DuneProcess.getInstance(project);
         if (process.start()) {
             ProcessHandler duneHandler = process.recreate(cliType, onProcessTerminated);
             if (duneHandler != null) {
@@ -64,26 +66,26 @@ public class DuneCompiler implements Compiler {
                     duneHandler.addProcessListener(new ProcessFinishedListener(start));
                 }
                 process.startNotify();
-                ServiceManager.getService(m_project, InsightManager.class).downloadRincewindIfNeeded(file);
+                ServiceManager.getService(project, InsightManager.class).downloadRincewindIfNeeded(file);
             } else {
                 process.terminate();
             }
         }
     }
 
-    // copied
     @Nullable
-    private ConsoleView getConsoleView() {
-        ConsoleView console = null;
-        ToolWindow window = ToolWindowManager.getInstance(m_project).getToolWindow("Bucklescript");
-        Content windowContent = window.getContentManager().getContent(0);
-        if (windowContent != null) {
-            SimpleToolWindowPanel component = (SimpleToolWindowPanel) windowContent.getComponent();
-            JComponent panelComponent = component.getComponent();
-            if (panelComponent != null) {
-                console = (ConsoleView) panelComponent.getComponent(0);
-            }
+    @Override
+    public ConsoleView getConsoleView() {
+        ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(DuneToolWindowFactory.IDENTIFIER);
+        Content windowContent = toolWindow.getContentManager().getContent(0);
+        if (windowContent == null) {
+            throw new DuneCompilerException("Unable to retrieve content from tool window.");
         }
-        return console;
+        SimpleToolWindowPanel component = (SimpleToolWindowPanel) windowContent.getComponent();
+        JComponent panelComponent = component.getComponent();
+        if (panelComponent == null) {
+            throw new DuneCompilerException("Unable to retrieve component from panel.");
+        }
+        return (ConsoleView) panelComponent.getComponent(0);
     }
 }

@@ -1,6 +1,6 @@
 package com.reason.ide.files;
 
-import com.intellij.openapi.fileTypes.DirectoryFileType;
+import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.reason.Icons;
 import org.jetbrains.annotations.Nls;
@@ -9,36 +9,36 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-public class EsySandboxFileType implements DirectoryFileType {
+public class BsPackageJsonFileType implements FileType {
 
-    public static final EsySandboxFileType INSTANCE = new EsySandboxFileType();
+    public static final FileType INSTANCE = new BsPackageJsonFileType();
 
-    private EsySandboxFileType() {}
+    private BsPackageJsonFileType() {}
 
     @Nls
     @NotNull
     @Override
     public String getName() {
-        return "Esy Sandbox";
+        return ".bsconfig";
     }
 
     @Nls
     @NotNull
     @Override
     public String getDescription() {
-        return "Esy sandbox directory";
+        return "BuckleScript configuration file.";
     }
 
     @NotNull
     @Override
     public String getDefaultExtension() {
-        return "";
+        return ".bsconfig";
     }
 
     @Nullable
     @Override
     public Icon getIcon() {
-        return Icons.ESY;
+        return Icons.BUCKLESCRIPT_TOOL;
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.reason.compiler;
 
+import com.intellij.execution.ui.ConsoleView;
 import com.intellij.facet.Facet;
 import com.intellij.facet.FacetManager;
 import com.intellij.notification.Notifications;
@@ -34,7 +35,7 @@ class CompilerProvider {
     private static final Compiler DUMMY_COMPILER = new Compiler() {
         @Nullable
         @Override
-        public VirtualFile findContentRoot(@NotNull Project project) {
+        public VirtualFile findContentRoot() {
             return null;
         }
 
@@ -52,7 +53,26 @@ class CompilerProvider {
         public void run(@NotNull VirtualFile file, @NotNull CliType cliType, @Nullable ProcessTerminated onProcessTerminated) {
             //nothing
         }
+
+        @Nullable
+        @Override
+        public ConsoleView getConsoleView() {
+            return null;
+        }
     };
+
+    public static Compiler getInstance(@NotNull Project project, @NotNull CliType cliType) {
+        if (cliType instanceof CliType.Bs) {
+            return ServiceManager.getService(project, Bucklescript.class);
+        }
+        if (cliType instanceof CliType.Dune) {
+            return DuneCompiler.getInstance(project);
+        }
+        if (cliType instanceof CliType.Esy) {
+            return EsyCompiler.getInstance(project);
+        }
+        return DUMMY_COMPILER;
+    }
 
     public static Compiler getInstance(Module module) {
         if (module == null) {

@@ -15,16 +15,20 @@ import com.reason.Icons;
 import com.reason.ide.facet.EsyFacet;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
+
 public class EsyToolWindowFactory extends ORToolWindowFactory {
 
     public static final String IDENTIFIER = "esy-tool-window";
 
+    public static final Icon ICON = Icons.ESY_TOOL;
+
+    public static final String TITLE = "Process";
+
+    public static final String STRIPE_TITLE = "Esy";
+
     @Override
     public void createToolWindowContent(@NotNull final Project project, @NotNull ToolWindow window) {
-        window.setIcon(Icons.ESY_TOOL);
-        window.setStripeTitle("Esy");
-        window.setTitle("Process");
-
         SimpleToolWindowPanel panel = new SimpleToolWindowPanel(false, true);
 
         EsyConsole console = new EsyConsole(project);
@@ -44,6 +48,21 @@ public class EsyToolWindowFactory extends ORToolWindowFactory {
     @Override
     FacetTypeId<?> getAssociatedFacet() {
         return EsyFacet.ID;
+    }
+
+    @Override
+    Icon getIcon() {
+        return ICON;
+    }
+
+    @Override
+    String getTitle() {
+        return TITLE;
+    }
+
+    @Override
+    String getStripeTitle() {
+        return STRIPE_TITLE;
     }
 
     @NotNull

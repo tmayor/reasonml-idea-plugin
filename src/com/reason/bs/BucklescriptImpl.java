@@ -58,8 +58,8 @@ public class BucklescriptImpl implements Bucklescript {
     //region Compiler
     @Nullable
     @Override
-    public VirtualFile findContentRoot(@NotNull Project project) {
-        return Platform.findORPackageJsonContentRoot(project);
+    public VirtualFile findContentRoot() {
+        return Platform.findORPackageJsonContentRoot(m_project);
     }
 
     @Override
@@ -83,7 +83,7 @@ public class BucklescriptImpl implements Bucklescript {
                 if (process.start()) {
                     ProcessHandler bscHandler = process.recreate(sourceFile, (CliType.Bs) cliType, onProcessTerminated);
                     if (bscHandler != null) {
-                        ConsoleView console = getBsbConsole();
+                        ConsoleView console = getConsoleView();
                         if (console != null) {
                             long start = System.currentTimeMillis();
                             console.attachToProcess(bscHandler);
@@ -175,7 +175,8 @@ public class BucklescriptImpl implements Bucklescript {
     }
 
     @Nullable
-    public ConsoleView getBsbConsole() {
+    @Override
+    public ConsoleView getConsoleView() {
         ConsoleView console = null;
 
         ToolWindow window = ToolWindowManager.getInstance(m_project).getToolWindow("Bucklescript");

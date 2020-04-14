@@ -24,7 +24,7 @@
 
         <!-- BuckleScript -->
 
-        <projectService serviceImplementation="com.reason.bs.Bucklescript"/>
+        <projectService serviceInterface="com.reason.bs.Bucklescript" serviceImplementation="com.reason.bs.BucklescriptImpl"/>
         <projectService serviceImplementation="com.reason.bs.BsProcess"/>
         <facetType implementation="com.reason.ide.facet.BsFacetType"/>
         <framework.detector implementation="com.reason.ide.facet.BsFrameworkDetector"/>

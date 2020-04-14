@@ -29,4 +29,6 @@ public class BsAction {
             CompilerAction.doAction(event, CliType.Bs.CLEAN_MAKE, this);
         }
     }
+
+    private BsAction() {}
 }

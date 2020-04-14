@@ -260,10 +260,7 @@
          | Compiler
          -->
 
-        <applicationService serviceImplementation="com.reason.compiler.CompilerManager"/>
-        <projectService serviceImplementation="com.reason.bs.BsProcess"/>
-        <projectService serviceInterface="com.reason.bs.Bucklescript"
-                        serviceImplementation="com.reason.bs.BucklescriptImpl"/>
+        <projectService serviceImplementation="com.reason.compiler.CompilerManager"/>
 
         <!--
          | Insight
@@ -353,7 +350,8 @@
          | Consoles
          -->
 
-        <toolWindow id="bs-tool-window" anchor="bottom" icon="/icons/bucklescript.png"
+        <toolWindow id="bs-tool-window" anchor="bottom"
+                    icon="/icons/bucklescript.png"
                     factoryClass="com.reason.ide.console.BsToolWindowFactory"/>
         <toolWindow id="dune-tool-window" anchor="bottom" icon="/icons/dune.png"
                     factoryClass="com.reason.ide.console.DuneToolWindowFactory"/>

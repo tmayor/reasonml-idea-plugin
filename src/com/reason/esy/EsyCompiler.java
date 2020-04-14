@@ -9,9 +9,9 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
-import com.reason.compiler.Compiler;
 import com.reason.Log;
 import com.reason.Platform;
+import com.reason.compiler.Compiler;
 import com.reason.compiler.ProcessFinishedListener;
 import com.reason.ide.console.CliType;
 import com.reason.ide.console.EsyToolWindowFactory;
@@ -38,7 +38,7 @@ public class EsyCompiler implements Compiler {
 
     @Nullable
     @Override
-    public VirtualFile findContentRoot(@NotNull Project project) {
+    public VirtualFile findContentRoot() {
         return Platform.findOREsyContentRoot(project);
     }
 
@@ -67,7 +67,8 @@ public class EsyCompiler implements Compiler {
         }
     }
 
-    private ConsoleView getConsoleView() {
+    @Override
+    public ConsoleView getConsoleView() {
         ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(EsyToolWindowFactory.IDENTIFIER);
         Content windowContent = toolWindow.getContentManager().getContent(0);
         if (windowContent == null) {

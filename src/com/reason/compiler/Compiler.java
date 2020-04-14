@@ -1,6 +1,6 @@
 package com.reason.compiler;
 
-import com.intellij.openapi.project.Project;
+import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.reason.ide.console.CliType;
 import org.jetbrains.annotations.NotNull;
@@ -14,7 +14,10 @@ public interface Compiler {
     }
 
     @Nullable
-    VirtualFile findContentRoot(@NotNull Project project);
+    ConsoleView getConsoleView();
+
+    @Nullable
+    VirtualFile findContentRoot();
 
     void refresh(@NotNull VirtualFile configFile);
 

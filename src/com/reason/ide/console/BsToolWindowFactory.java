@@ -15,16 +15,20 @@ import com.reason.Icons;
 import com.reason.ide.facet.BsFacet;
 import org.jetbrains.annotations.NotNull;
 
+import javax.swing.*;
+
 public class BsToolWindowFactory extends ORToolWindowFactory {
 
     public static final String IDENTIFIER = "bs-tool-window";
 
+    public static final Icon ICON = Icons.BUCKLESCRIPT_TOOL;
+
+    public static final String TITLE = "Process";
+
+    public static final String STRIPE_TITLE = "BuckleScript";
+
     @Override
     public void createToolWindowContent(@NotNull final Project project, @NotNull ToolWindow window) {
-        window.setIcon(Icons.BUCKLESCRIPT_TOOL);
-        window.setStripeTitle("BuckleScript");
-        window.setTitle("Process");
-
         SimpleToolWindowPanel panel = new SimpleToolWindowPanel(false, true);
 
         BsConsole console = new BsConsole(project);
@@ -43,6 +47,21 @@ public class BsToolWindowFactory extends ORToolWindowFactory {
     @Override
     FacetTypeId<?> getAssociatedFacet() {
         return BsFacet.ID;
+    }
+
+    @Override
+    Icon getIcon() {
+        return ICON;
+    }
+
+    @Override
+    String getTitle() {
+        return TITLE;
+    }
+
+    @Override
+    String getStripeTitle() {
+        return STRIPE_TITLE;
     }
 
     @NotNull
