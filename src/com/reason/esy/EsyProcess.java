@@ -143,7 +143,7 @@ public class EsyProcess implements CompilerProcess {
 
   @Override
   public void startNotify() {
-    if (processHandler != null && !processHandler.isStartNotified()) {
+   if (processHandler != null && !processHandler.isStartNotified()) {
       try {
         processHandler.startNotify();
       } catch (Exception e) {

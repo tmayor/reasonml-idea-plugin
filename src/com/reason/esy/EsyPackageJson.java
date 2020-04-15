@@ -17,6 +17,8 @@ import com.reason.ide.facet.EsyFrameworkDetector;
 import com.reason.ide.files.EsyPackageJsonFileType;
 import org.jetbrains.annotations.NotNull;
 
+import java.io.IOException;
+
 public class EsyPackageJson {
 
     public static final FileType FILE_TYPE = EsyPackageJsonFileType.INSTANCE;
@@ -30,7 +32,7 @@ public class EsyPackageJson {
     // @TODO test
     public static ElementPattern<FileContent> createFilePattern() {
         return FileContentPattern.fileContent()
-                .withName(EsyPackageJsonFileType.INSTANCE.getName())
+                .withName(EsyPackageJsonFileType.getDefaultFilename())
                 .with(new PatternCondition<FileContent>(EsyFrameworkDetector.class.getName()) {
                     @Override
                     public boolean accepts(@NotNull FileContent fileContent, ProcessingContext context) {

@@ -7,8 +7,7 @@ import com.intellij.openapi.options.ConfigurationException;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.roots.ui.configuration.JdkComboBox;
 import com.intellij.openapi.roots.ui.configuration.projectRoot.ProjectSdksModel;
-import com.reason.OCamlSdkType;
-import org.jetbrains.annotations.Nls;
+import com.reason.sdk.OCamlSdkType;
 import org.jetbrains.annotations.NotNull;
 
 import javax.swing.*;
@@ -29,7 +28,6 @@ class DuneFacetEditor extends FacetEditorTab {
     }
 
     @NotNull
-    @Nls
     @Override
     public String getDisplayName() {
         return "Dune";
