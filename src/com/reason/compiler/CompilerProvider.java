@@ -33,10 +33,10 @@ class CompilerProvider {
             ERROR, URL_OPENING_LISTENER));
 
     private static final Compiler DUMMY_COMPILER = new Compiler() {
-        @Nullable
+
         @Override
-        public VirtualFile findContentRoot() {
-            return null;
+        public Optional<VirtualFile> findContentRoot() {
+            return Optional.empty();
         }
 
         @Override

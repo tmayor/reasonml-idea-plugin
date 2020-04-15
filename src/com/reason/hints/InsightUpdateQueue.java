@@ -22,8 +22,8 @@ import com.intellij.psi.PsiManager;
 import com.intellij.util.ui.update.MergingUpdateQueue;
 import com.intellij.util.ui.update.Update;
 import com.reason.Log;
-import com.reason.Platform;
 import com.reason.bs.*;
+import com.reason.ide.FileManager;
 import com.reason.ide.annotations.ErrorsManager;
 import com.reason.ide.annotations.OutputInfo;
 import com.reason.ide.hints.InferredTypesService;
@@ -56,7 +56,7 @@ public class InsightUpdateQueue extends MergingUpdateQueue {
         super("hints", 200, true, null);
         setRestartTimerOnAdd(true);
 
-        m_contentRoot = Platform.findAncestorContentRoot(project, sourceFile);
+        m_contentRoot = FileManager.findAncestorContentRoot(project, sourceFile);
         m_libRoot = m_contentRoot == null ? null : m_contentRoot.findFileByRelativePath("lib/bs");
         m_sourceFile = sourceFile;
 

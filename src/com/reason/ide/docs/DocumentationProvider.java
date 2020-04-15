@@ -1,40 +1,25 @@
 package com.reason.ide.docs;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import com.intellij.lang.Language;
 import com.intellij.lang.documentation.AbstractDocumentationProvider;
 import com.intellij.openapi.editor.Editor;
 import com.intellij.openapi.project.Project;
-import com.intellij.psi.PsiComment;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiNameIdentifierOwner;
-import com.intellij.psi.PsiReference;
-import com.intellij.psi.PsiWhiteSpace;
+import com.intellij.psi.*;
 import com.intellij.psi.util.PsiTreeUtil;
-import com.reason.Platform;
+import com.reason.ide.FileManager;
 import com.reason.ide.files.FileBase;
 import com.reason.ide.hints.SignatureProvider;
 import com.reason.ide.search.PsiFinder;
 import com.reason.ide.search.PsiTypeElementProvider;
 import com.reason.lang.core.ORUtil;
-import com.reason.lang.core.psi.PsiFakeModule;
-import com.reason.lang.core.psi.PsiFunctionCallParams;
-import com.reason.lang.core.psi.PsiLet;
-import com.reason.lang.core.psi.PsiLowerSymbol;
-import com.reason.lang.core.psi.PsiModule;
-import com.reason.lang.core.psi.PsiQualifiedElement;
-import com.reason.lang.core.psi.PsiSignatureElement;
 import com.reason.lang.core.psi.PsiType;
-import com.reason.lang.core.psi.PsiTypeConstrName;
-import com.reason.lang.core.psi.PsiUpperSymbol;
-import com.reason.lang.core.psi.PsiVal;
-import com.reason.lang.core.psi.PsiVariantDeclaration;
+import com.reason.lang.core.psi.*;
 import com.reason.lang.core.psi.reference.ORFakeResolvedElement;
 import com.reason.lang.core.signature.ORSignature;
 import com.reason.lang.ocaml.OclLanguage;
 import com.reason.lang.reason.RmlLanguage;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import static com.reason.lang.odoc.ODocMarkup.*;
 
@@ -163,7 +148,8 @@ public class DocumentationProvider extends AbstractDocumentationProvider {
 
             if (resolvedElement instanceof FileBase) {
                 FileBase resolvedFile = (FileBase) resolvedElement;
-                String relative_path = Platform.removeProjectDir(resolvedFile.getProject(), resolvedFile.getVirtualFile().getParent().getPath());
+                String relative_path = FileManager.removeProjectDir(resolvedFile.getProject(),
+                        resolvedFile.getVirtualFile().getParent().getPath());
                 return relative_path + "<br/>" + resolvedElement.getContainingFile();
             }
 

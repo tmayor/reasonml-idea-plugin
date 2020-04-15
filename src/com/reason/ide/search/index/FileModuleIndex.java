@@ -1,26 +1,27 @@
 package com.reason.ide.search.index;
 
-import java.io.*;
-import java.util.*;
-import org.jetbrains.annotations.NotNull;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
-import com.intellij.util.indexing.DataIndexer;
-import com.intellij.util.indexing.FileBasedIndex;
-import com.intellij.util.indexing.FileBasedIndexExtension;
-import com.intellij.util.indexing.FileContent;
-import com.intellij.util.indexing.ID;
+import com.intellij.util.indexing.*;
 import com.intellij.util.io.DataExternalizer;
 import com.intellij.util.io.EnumeratorStringDescriptor;
 import com.intellij.util.io.KeyDescriptor;
 import com.reason.Log;
-import com.reason.Platform;
 import com.reason.bs.BsConfig;
 import com.reason.bs.BsConfigReader;
+import com.reason.ide.FileManager;
 import com.reason.ide.files.FileBase;
 import com.reason.ide.files.FileHelper;
 import com.reason.ide.search.FileModuleData;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.DataInput;
+import java.io.DataOutput;
+import java.io.IOException;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 public class FileModuleIndex extends FileBasedIndexExtension<String, FileModuleData> {
 
@@ -89,7 +90,7 @@ public class FileModuleIndex extends FileBasedIndexExtension<String, FileModuleD
                     Map<String, FileModuleData> map = new HashMap<>();
 
                     String namespace = "";
-                    VirtualFile bsconfigFile = Platform.findAncestorBsconfig(inputData.getProject(), inputData.getFile());
+                    VirtualFile bsconfigFile = FileManager.findAncestorBsconfig(inputData.getProject(), inputData.getFile());
                     if (bsconfigFile != null) {
                         VirtualFile parent = bsconfigFile.getParent();
                         boolean useExternalAsSource = "bs-platform".equals(parent.getName());
@@ -109,7 +110,7 @@ public class FileModuleIndex extends FileBasedIndexExtension<String, FileModuleD
                                                               psiFile.isInterface(), psiFile.isComponent());
                     if (LOG.isDebugEnabled()) {
                         String path = inputData.getFile().getPath();
-                        LOG.debug("indexing " + Platform.removeProjectDir(inputData.getProject(), path) + ": " + value);
+                        LOG.debug("indexing " + FileManager.removeProjectDir(inputData.getProject(), path) + ": " + value);
                     }
 
                     map.put(moduleName, value);

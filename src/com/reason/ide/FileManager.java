@@ -1,31 +1,32 @@
 package com.reason.ide;
 
-import java.io.*;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import com.intellij.openapi.components.ServiceManager;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.DumbService;
 import com.intellij.openapi.project.Project;
-import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiFile;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.reason.Joiner;
 import com.reason.Log;
-import com.reason.Platform;
 import com.reason.StringUtil;
 import com.reason.bs.Bucklescript;
-import com.reason.ide.files.FileBase;
+import com.reason.ide.files.BsConfigJsonFileType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.util.Optional;
 
 public class FileManager {
 
     private static final Log LOG = Log.create("file");
 
-    private FileManager() {
-    }
+    private FileManager() {}
 
     @Nullable
     public static PsiFile findCmtFileFromSource(@NotNull Project project, @NotNull String filenameWithoutExtension) {
@@ -67,7 +68,7 @@ public class FileManager {
     @Nullable
     public static VirtualFile toSource(@NotNull Project project, @NotNull VirtualFile cmxFile, @NotNull Path relativeCmi) {
         String relativeSource = separatorsToUnix(toRelativeSourceName(project, cmxFile, relativeCmi));
-        VirtualFile contentRoot = Platform.findORPackageJsonContentRoot(project);
+        VirtualFile contentRoot = ORModuleManager.findFirstBsContentRoot(project).get();
         VirtualFile sourceFile = contentRoot == null ? null : contentRoot.findFileByRelativePath(relativeSource);
 
         if (sourceFile == null && contentRoot != null) {
@@ -113,5 +114,70 @@ public class FileManager {
     @NotNull
     private static String separatorsToUnix(@NotNull String path) {
         return path.replace('\\', '/');
+    }
+
+    // Special finder that iterate through parents until a bsConfig.json is found.
+    // This is always needed, we can't use module itself
+
+    @Nullable
+    public static VirtualFile findAncestorBsconfig(@NotNull Project project, @NotNull VirtualFile sourceFile) {
+        VirtualFile contentRoot = ORModuleManager.findFirstBsContentRoot(project).get();
+        if (sourceFile.equals(contentRoot)) {
+            return sourceFile;
+        }
+
+        VirtualFile parent = sourceFile.getParent();
+        if (parent == null) {
+            return sourceFile;
+        }
+
+        VirtualFile child = parent.findChild(BsConfigJsonFileType.getDefaultFilename());
+        while (child == null) {
+            VirtualFile grandParent = parent.getParent();
+            if (grandParent == null) {
+                break;
+            }
+
+            parent = grandParent;
+            child = parent.findChild(BsConfigJsonFileType.getDefaultFilename());
+            if (parent.equals(contentRoot)) {
+                break;
+            }
+        }
+
+        return child;
+    }
+
+    public static VirtualFile findAncestorContentRoot(Project project, VirtualFile file) {
+        VirtualFile bsConfig = findAncestorBsconfig(project, file);
+        return bsConfig == null ? null : bsConfig.getParent();
+    }
+
+    @NotNull
+    public static String removeProjectDir(@NotNull Project project, @NotNull String path) {
+        try {
+            Optional<VirtualFile> baseRoot = ORModuleManager.findFirstBsContentRoot(project);
+            if (!baseRoot.isPresent()) {
+                return path;
+            }
+            Path basePath = FileSystems.getDefault().getPath(baseRoot.get().getPath());
+            Path relativePath = basePath.relativize(new File(path).toPath());
+            return relativePath.toString();
+        } catch (IllegalArgumentException e) {
+            return path;
+        }
+    }
+
+    @Nullable
+    public static VirtualFile findFileByRelativePath(@NotNull Project project, @NotNull String path) {
+        for (Module module : ModuleManager.getInstance(project).getModules()) {
+            VirtualFile moduleFile = module.getModuleFile();
+            VirtualFile baseDir = moduleFile == null ? null : moduleFile.getParent();
+            VirtualFile file = baseDir == null ? null : baseDir.findFileByRelativePath(path);
+            if (file != null) {
+                return file;
+            }
+        }
+        return null;
     }
 }

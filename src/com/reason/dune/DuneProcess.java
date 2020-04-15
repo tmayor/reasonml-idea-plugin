@@ -1,30 +1,29 @@
 package com.reason.dune;
 
-import java.io.*;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.util.*;
-import java.util.concurrent.atomic.*;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
-import com.intellij.execution.process.KillableColoredProcessHandler;
-import com.intellij.execution.process.ProcessAdapter;
-import com.intellij.execution.process.ProcessEvent;
-import com.intellij.execution.process.ProcessHandler;
-import com.intellij.execution.process.ProcessListener;
+import com.intellij.execution.process.*;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.reason.compiler.Compiler;
-import com.reason.compiler.CompilerProcess;
 import com.reason.OCamlSdkType;
 import com.reason.Platform;
+import com.reason.compiler.Compiler;
+import com.reason.compiler.CompilerProcess;
+import com.reason.ide.ORModuleManager;
 import com.reason.ide.ORNotification;
 import com.reason.ide.console.CliType;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.File;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import static com.intellij.notification.NotificationListener.URL_OPENING_LISTENER;
 import static com.intellij.notification.NotificationType.ERROR;
@@ -104,8 +103,8 @@ public final class DuneProcess implements CompilerProcess {
         }
         assert odk.getHomePath() != null;
 
-        VirtualFile baseRoot = Platform.findORDuneContentRoot(m_project);
-        if (baseRoot == null) {
+        Optional<VirtualFile> baseRoot = ORModuleManager.findFirstDuneContentRoot(m_project);
+        if (!baseRoot.isPresent()) {
             return null;
         }
 
@@ -138,7 +137,7 @@ public final class DuneProcess implements CompilerProcess {
         cli.withEnvironment("PATH", ocamlPath + File.pathSeparator + environment.get("PATH"));
         cli.withEnvironment("OCAMLLIB", fileSystem.getPath(odk.getHomePath(), "lib", "ocaml").toString());
         cli.withEnvironment("CAML_LD_LIBRARY_PATH", libPath);
-        cli.setWorkDirectory(baseRoot.getPath());
+        cli.setWorkDirectory(baseRoot.get().getPath());
         cli.setRedirectErrorStream(true);
 
         return cli;

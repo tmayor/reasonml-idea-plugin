@@ -9,17 +9,20 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-public class BsPackageJsonFileType implements FileType {
+public class BsConfigJsonFileType implements FileType {
 
-    public static final FileType INSTANCE = new BsPackageJsonFileType();
+    public static final FileType INSTANCE = new BsConfigJsonFileType();
 
-    private BsPackageJsonFileType() {}
+    public static String getDefaultFilename() {
+        return "bsconfig.json";
+    }
 
-    @Nls
+    private BsConfigJsonFileType() {}
+
     @NotNull
     @Override
     public String getName() {
-        return ".bsconfig";
+        return "bsconfig";
     }
 
     @Nls
@@ -32,7 +35,7 @@ public class BsPackageJsonFileType implements FileType {
     @NotNull
     @Override
     public String getDefaultExtension() {
-        return ".bsconfig";
+        return "json";
     }
 
     @Nullable

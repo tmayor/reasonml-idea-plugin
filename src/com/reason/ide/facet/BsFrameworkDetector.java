@@ -6,7 +6,7 @@ import com.intellij.framework.detection.FileContentPattern;
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.patterns.ElementPattern;
 import com.intellij.util.indexing.FileContent;
-import com.reason.ide.files.BsPackageJsonFileType;
+import com.reason.ide.files.BsConfigJsonFileType;
 import org.jetbrains.annotations.NotNull;
 
 public class BsFrameworkDetector extends FacetBasedFrameworkDetector<BsFacet, BsFacetConfiguration> {
@@ -24,12 +24,12 @@ public class BsFrameworkDetector extends FacetBasedFrameworkDetector<BsFacet, Bs
     @NotNull
     @Override
     public FileType getFileType() {
-        return BsPackageJsonFileType.INSTANCE;
+        return BsConfigJsonFileType.INSTANCE;
     }
 
     @NotNull
     @Override
     public ElementPattern<FileContent> createSuitableFilePattern() {
-        return FileContentPattern.fileContent().withName("");
+        return FileContentPattern.fileContent().withName(BsConfigJsonFileType.INSTANCE.getName());
     }
 }

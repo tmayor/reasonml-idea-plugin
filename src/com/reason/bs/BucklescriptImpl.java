@@ -18,10 +18,11 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
 import com.reason.FileUtil;
-import com.reason.Platform;
 import com.reason.compiler.ProcessFinishedListener;
 import com.reason.hints.InsightManager;
-import com.reason.ORNotification;
+import com.reason.ide.FileManager;
+import com.reason.ide.ORModuleManager;
+import com.reason.ide.ORNotification;
 import com.reason.ide.console.CliType;
 import com.reason.ide.settings.ReasonSettings;
 import org.jetbrains.annotations.NotNull;
@@ -30,6 +31,7 @@ import org.jetbrains.coverage.gnu.trove.THashMap;
 
 import javax.swing.*;
 import java.util.Map;
+import java.util.Optional;
 
 public class BucklescriptImpl implements Bucklescript {
 
@@ -47,7 +49,7 @@ public class BucklescriptImpl implements Bucklescript {
     @NotNull
     @Override
     public String getNamespace(@NotNull VirtualFile sourceFile) {
-        VirtualFile bsConfigFile = Platform.findAncestorBsconfig(m_project, sourceFile);
+        VirtualFile bsConfigFile = FileManager.findAncestorBsconfig(m_project, sourceFile);
         if (bsConfigFile != null) {
             BsConfig bsConfig = getOrRefreshBsConfig(bsConfigFile);
             return bsConfig.getNamespace();
@@ -55,11 +57,9 @@ public class BucklescriptImpl implements Bucklescript {
         return "";
     }
 
-    //region Compiler
-    @Nullable
     @Override
-    public VirtualFile findContentRoot() {
-        return Platform.findORPackageJsonContentRoot(m_project);
+    public Optional<VirtualFile> findContentRoot() {
+        return ORModuleManager.findFirstBsContentRoot(m_project);
     }
 
     @Override
@@ -76,7 +76,7 @@ public class BucklescriptImpl implements Bucklescript {
     @Override
     public void run(@NotNull VirtualFile sourceFile, @NotNull CliType cliType, @Nullable ProcessTerminated onProcessTerminated) {
         if (!isDisabled() && ReasonSettings.getInstance(m_project).isEnabled()) {
-            VirtualFile bsconfigFile = Platform.findAncestorBsconfig(m_project, sourceFile);
+            VirtualFile bsconfigFile = FileManager.findAncestorBsconfig(m_project, sourceFile);
             if (bsconfigFile != null) {
                 getOrRefreshBsConfig(bsconfigFile);
                 BsProcess process = ServiceManager.getService(m_project, BsProcess.class);
@@ -117,7 +117,7 @@ public class BucklescriptImpl implements Bucklescript {
             return false;
         }
 
-        VirtualFile bsConfigFile = Platform.findAncestorBsconfig(m_project, file);
+        VirtualFile bsConfigFile = FileManager.findAncestorBsconfig(m_project, file);
         return bsConfigFile == null || getOrRefreshBsConfig(bsConfigFile).accept(file.getPath());
     }
 

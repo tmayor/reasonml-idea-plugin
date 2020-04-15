@@ -2,7 +2,7 @@ package com.reason.ide.files;
 
 import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.project.Project;
-import com.reason.Platform;
+import com.reason.ide.FileManager;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,7 +38,7 @@ public class FileHelper {
 
     @NotNull
     public static String shortLocation(@NotNull Project project, @NotNull String path) {
-        String newPath = Platform.removeProjectDir(project, path).replace("node_modules" + File.separator, "");
+        String newPath = FileManager.removeProjectDir(project, path).replace("node_modules" + File.separator, "");
         int pos = newPath.lastIndexOf("/");
         return 0 < pos ? newPath.substring(0, pos) : newPath;
     }

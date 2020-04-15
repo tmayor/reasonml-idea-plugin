@@ -10,15 +10,16 @@ import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
 import com.reason.Log;
-import com.reason.Platform;
 import com.reason.compiler.Compiler;
 import com.reason.compiler.ProcessFinishedListener;
+import com.reason.ide.ORModuleManager;
 import com.reason.ide.console.CliType;
 import com.reason.ide.console.EsyToolWindowFactory;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
+import java.util.Optional;
 
 public class EsyCompiler implements Compiler {
 
@@ -36,10 +37,9 @@ public class EsyCompiler implements Compiler {
         LOG.info("Created esy compiler instance.");
     }
 
-    @Nullable
     @Override
-    public VirtualFile findContentRoot() {
-        return Platform.findOREsyContentRoot(project);
+    public Optional<VirtualFile> findContentRoot() {
+        return ORModuleManager.findFirstEsyContentRoot(project);
     }
 
     @Override

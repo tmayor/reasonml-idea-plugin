@@ -5,12 +5,13 @@ import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.reason.compiler.Compiler;
 import com.reason.compiler.CompilerProcess;
-import com.reason.Platform;
-import com.reason.ORNotification;
+import com.reason.ide.ORModuleManager;
+import com.reason.ide.ORNotification;
 import com.reason.ide.console.CliType;
 import com.reason.ide.settings.ReasonSettings;
 import org.jetbrains.annotations.NotNull;
@@ -19,6 +20,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -44,7 +46,10 @@ public final class BsProcess implements CompilerProcess {
 
     public BsProcess(@NotNull Project project) {
         m_project = project;
-        create(Platform.findProjectBsconfig(project), CliType.Bs.MAKE, null);
+        // @TODO this is unsafe...
+        Optional<Module> firstBsModule = ORModuleManager.findFirstBsModule(project);
+        Optional<VirtualFile> bsConfigFile = ORModuleManager.findBsConfigurationFile(firstBsModule.get());
+        create(bsConfigFile.get(), CliType.Bs.MAKE, null);
     }
 
     // Wait for the tool window to be ready before starting the process

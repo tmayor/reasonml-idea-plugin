@@ -1,14 +1,14 @@
 package com.reason.ide.settings;
 
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.reason.Platform;
+import com.reason.ide.FileManager;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 @State(name = "ReasonSettings", storages = {@Storage("reason.xml")})
 public class ReasonSettings implements PersistentStateComponent<ReasonSettings.ReasonSettingsState> {
@@ -85,7 +85,7 @@ public class ReasonSettings implements PersistentStateComponent<ReasonSettings.R
     @NotNull
     public String getWorkingDir(@NotNull VirtualFile sourceFile) {
         if (m_workingDir.isEmpty()) {
-            VirtualFile contentRoot = Platform.findAncestorContentRoot(m_project, sourceFile);
+            VirtualFile contentRoot = FileManager.findAncestorContentRoot(m_project, sourceFile);
             return contentRoot == null ? "" : contentRoot.getPath();
         }
         return m_workingDir;

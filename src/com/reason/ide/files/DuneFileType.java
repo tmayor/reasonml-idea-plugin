@@ -9,8 +9,13 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-public class DuneFileType extends LanguageFileType {
+public class DuneFileType extends LanguageFileType implements FileType {
+
     public static final FileType INSTANCE = new DuneFileType();
+
+    public static String getDefaultFilename() {
+        return "dune-project";
+    }
 
     private DuneFileType() {
         super(DuneLanguage.INSTANCE);
@@ -19,7 +24,7 @@ public class DuneFileType extends LanguageFileType {
     @NotNull
     @Override
     public String getName() {
-        return "Dune configuration";
+        return "dune-project";
     }
 
     @NotNull

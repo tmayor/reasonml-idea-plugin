@@ -5,13 +5,13 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.reason.Log;
-import com.reason.Platform;
 import com.reason.bs.Bucklescript;
 import com.reason.compiler.Compiler;
 import com.reason.compiler.CompilerManager;
 import com.reason.hints.InsightManager;
 import com.reason.ide.FileManager;
 import com.reason.ide.OREditorTracker;
+import com.reason.ide.ORModuleManager;
 import com.reason.ide.files.FileHelper;
 import com.reason.lang.ocaml.OclLanguage;
 import com.reason.lang.reason.RmlLanguage;
@@ -35,17 +35,18 @@ public class CmtFileListener {
     public void onChange(@NotNull VirtualFile file) {
         Path relativeCmt;
 
+        // @TODO this needs to be updated
         Compiler compiler = CompilerManager.getInstance(m_project).getCompiler(file);
         if (compiler instanceof Bucklescript) {
             Path relativeRoot = FileSystems.getDefault().getPath("lib", "bs");
-            VirtualFile baseRoot = Platform.findORPackageJsonContentRoot(m_project);
+            VirtualFile baseRoot = ORModuleManager.findFirstBsContentRoot(m_project).get();
             Path pathToWatch = getPathToWatch(baseRoot, relativeRoot);
             Path path = FileSystems.getDefault().getPath(file.getPath()).toAbsolutePath();
 
             relativeCmt = pathToWatch == null ? null : pathToWatch.relativize(path);
         } else {
             Path relativeRoot = FileSystems.getDefault().getPath("_build", "default");
-            VirtualFile baseRoot = Platform.findORDuneContentRoot(m_project);
+            VirtualFile baseRoot = ORModuleManager.findFirstDuneContentRoot(m_project).get();
             Path pathToWatch = getPathToWatch(baseRoot, relativeRoot);
             Path path = FileSystems.getDefault().getPath(file.getPath()).toAbsolutePath();
             relativeCmt = pathToWatch == null ? null : pathToWatch.relativize(path);

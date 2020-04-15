@@ -1,6 +1,6 @@
 package com.reason.ide.files;
 
-import com.intellij.openapi.fileTypes.DirectoryFileType;
+import com.intellij.openapi.fileTypes.FileType;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.reason.Icons;
 import org.jetbrains.annotations.Nls;
@@ -9,36 +9,39 @@ import org.jetbrains.annotations.Nullable;
 
 import javax.swing.*;
 
-public class EsySandboxFileType implements DirectoryFileType {
+public class EsyPackageJsonFileType implements FileType {
 
-    public static final EsySandboxFileType INSTANCE = new EsySandboxFileType();
+    public static final FileType INSTANCE = new EsyPackageJsonFileType();
 
-    private EsySandboxFileType() {}
+    public static String getDefaultFilename() {
+        return "package.json";
+    }
 
-    @Nls
+    private EsyPackageJsonFileType() {}
+
     @NotNull
     @Override
     public String getName() {
-        return "Esy Sandbox";
+        return "package";
     }
 
     @Nls
     @NotNull
     @Override
     public String getDescription() {
-        return "Esy sandbox directory";
+        return "Esy package.json.";
     }
 
     @NotNull
     @Override
     public String getDefaultExtension() {
-        return "";
+        return "json";
     }
 
     @Nullable
     @Override
     public Icon getIcon() {
-        return Icons.ESY;
+        return Icons.BUCKLESCRIPT_TOOL;
     }
 
     @Override

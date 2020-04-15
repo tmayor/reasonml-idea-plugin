@@ -1,9 +1,5 @@
 package com.reason.dune;
 
-import java.util.*;
-import java.util.regex.*;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import com.intellij.codeInsight.daemon.DaemonCodeAnalyzer;
 import com.intellij.execution.process.ProcessEvent;
 import com.intellij.execution.process.ProcessListener;
@@ -15,10 +11,17 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.Key;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.reason.compiler.CompilerProcess;
-import com.reason.Platform;
+import com.reason.ide.FileManager;
 import com.reason.ide.annotations.ErrorsManager;
 import com.reason.ide.annotations.OutputInfo;
 import com.reason.ide.hints.InferredTypesService;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static java.lang.Integer.parseInt;
 
@@ -129,7 +132,7 @@ public class DuneOutputListener implements ProcessListener {
     private OutputInfo addInfo(@NotNull String path, @NotNull String line, @NotNull String colStart, @NotNull String colEnd) {
         OutputInfo info = new OutputInfo();
 
-        VirtualFile fileInError = Platform.findFileByRelativePath(m_project, path);
+        VirtualFile fileInError = FileManager.findFileByRelativePath(m_project, path);
         if (fileInError == null) {
             return null;
         }

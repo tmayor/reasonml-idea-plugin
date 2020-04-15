@@ -1,10 +1,5 @@
 package com.reason.hints;
 
-import java.io.*;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.util.*;
-import org.jetbrains.annotations.NotNull;
 import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.components.ServiceManager;
@@ -12,10 +7,19 @@ import com.intellij.openapi.editor.LogicalPosition;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.reason.Log;
-import com.reason.Platform;
 import com.reason.Streams;
-import com.reason.ORNotification;
+import com.reason.ide.FileManager;
+import com.reason.ide.ORNotification;
 import com.reason.ide.hints.InferredTypesImplementation;
+import org.jetbrains.annotations.NotNull;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.InputStreamReader;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RincewindProcess {
 
@@ -35,7 +39,7 @@ public class RincewindProcess {
                       @NotNull InsightManager.ProcessTerminated runAfter) {
         LOG.debug("Looking for types for file", sourceFile);
 
-        VirtualFile contentRoot = Platform.findAncestorContentRoot(m_project, sourceFile);
+        VirtualFile contentRoot = FileManager.findAncestorContentRoot(m_project, sourceFile);
         if (contentRoot == null) {
             return;
         }
@@ -121,7 +125,7 @@ public class RincewindProcess {
     }
 
     public void dumper(@NotNull String rincewindBinary, @NotNull VirtualFile cmtFile, String arg, DumpVisitor visitor) {
-        VirtualFile contentRoot = Platform.findAncestorContentRoot(m_project, cmtFile);
+        VirtualFile contentRoot = FileManager.findAncestorContentRoot(m_project, cmtFile);
         if (contentRoot != null) {
             Path cmtPath = FileSystems.getDefault().getPath(cmtFile.getPath());
 

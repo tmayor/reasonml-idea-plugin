@@ -47,13 +47,13 @@ abstract class CompilerAction extends DumbAwareAction {
         if (consoleView == null) {
             return;
         }
-        VirtualFile baseDir = compiler.findContentRoot();
-        if (baseDir == null) {
+        Optional<VirtualFile> baseDir = compiler.findContentRoot();
+        if (!baseDir.isPresent()) {
             consoleView.print("Can't find content root\n", ConsoleViewContentType.NORMAL_OUTPUT);
         } else {
-            consoleView.print("No active text editor found, using root directory " + baseDir.getPath() + "\n",
+            consoleView.print("No active text editor found, using root directory " + baseDir.get().getPath() + "\n",
                     ConsoleViewContentType.NORMAL_OUTPUT);
-            compiler.run(baseDir, cliType, null);
+            compiler.run(baseDir.get(), cliType, null);
         }
     }
 

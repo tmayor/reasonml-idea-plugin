@@ -1,9 +1,8 @@
 package com.reason.ide.js;
 
-import java.util.*;
-import org.jetbrains.annotations.NotNull;
 import com.intellij.lang.javascript.library.JSLibraryManager;
 import com.intellij.openapi.command.WriteCommandAction;
+import com.intellij.openapi.module.Module;
 import com.intellij.openapi.project.DumbAware;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.startup.StartupActivity;
@@ -13,9 +12,14 @@ import com.intellij.openapi.vfs.pointers.VirtualFilePointerListener;
 import com.intellij.openapi.vfs.pointers.VirtualFilePointerManager;
 import com.intellij.webcore.libraries.ScriptingLibraryModel;
 import com.reason.Log;
-import com.reason.Platform;
 import com.reason.bs.BsConfig;
 import com.reason.bs.BsConfigReader;
+import com.reason.ide.ORModuleManager;
+import org.jetbrains.annotations.NotNull;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 import static com.intellij.openapi.vfs.VirtualFile.EMPTY_ARRAY;
 import static com.intellij.util.ArrayUtilRt.EMPTY_STRING_ARRAY;
@@ -30,10 +34,11 @@ public class OrJsLibraryManager implements StartupActivity, DumbAware {
     public void runActivity(@NotNull Project project) {
         JSLibraryManager jsLibraryManager = JSLibraryManager.getInstance(project);
 
-        VirtualFile bsConfigFile = Platform.findProjectBsconfig(project);
-        if (bsConfigFile != null) {
-            String baseDir = "file://" + bsConfigFile.getParent().getPath() + "/node_modules/";
-            List<VirtualFile> sources = new ArrayList<>(readBsConfigDependencies(project, baseDir, bsConfigFile));
+        Optional<Module> firstBsModule = ORModuleManager.findFirstBsModule(project);
+        Optional<VirtualFile> bsConfigFile = ORModuleManager.findBsConfigurationFile(firstBsModule.get());
+        if (bsConfigFile.isPresent()) {
+            String baseDir = "file://" + bsConfigFile.get().getParent().getPath() + "/node_modules/";
+            List<VirtualFile> sources = new ArrayList<>(readBsConfigDependencies(project, baseDir, bsConfigFile.get()));
 
             ScriptingLibraryModel bucklescriptModel = jsLibraryManager.getLibraryByName(LIB_NAME);
             if (bucklescriptModel == null) {

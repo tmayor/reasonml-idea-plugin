@@ -11,9 +11,9 @@ import com.intellij.openapi.project.Project;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.reason.Log;
-import com.reason.Platform;
 import com.reason.compiler.Compiler.ProcessTerminated;
 import com.reason.compiler.CompilerProcess;
+import com.reason.ide.ORModuleManager;
 import com.reason.ide.ORNotification;
 import com.reason.ide.console.CliType;
 import org.jetbrains.annotations.Nls;
@@ -103,9 +103,9 @@ public class EsyProcess implements CompilerProcess {
 
   private EsyProcess(@NotNull Project project) {
     FileSystem fileSystem = FileSystems.getDefault();
-    VirtualFile esyContentRoot = findEsyContentRoot(project);
+    Optional<VirtualFile> esyContentRoot = findEsyContentRoot(project);
     // @TODO better defaulting for esy root
-    String esyRootAsString = esyContentRoot == null ? "" : esyContentRoot.getPath();
+    String esyRootAsString = esyContentRoot.map(VirtualFile::getPath).orElse("");
     this.workingDir = fileSystem.getPath(esyRootAsString);
     this.esyExecutable = findEsyExecutableInPath();
     this.redirectErrors = true;
@@ -226,11 +226,11 @@ public class EsyProcess implements CompilerProcess {
     return exeFile == null ? Optional.empty() : Optional.of(exeFile.toPath());
   }
 
-  @Nullable
-  private static VirtualFile findEsyContentRoot(@NotNull Project project) {
-    VirtualFile esyContentRoot = Platform.findOREsyContentRoot(project);
-    if (esyContentRoot == null) {
+  private static Optional<VirtualFile> findEsyContentRoot(@NotNull Project project) {
+    Optional<VirtualFile> esyContentRoot = ORModuleManager.findFirstEsyContentRoot(project);
+    if (!esyContentRoot.isPresent()) {
       SHOW_ESY_NOT_FOUND_NOTIFICATION.run();
+      return Optional.empty();
     }
     return esyContentRoot;
   }

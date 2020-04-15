@@ -30,6 +30,6 @@ public class DuneFrameworkDetector extends FacetBasedFrameworkDetector<DuneFacet
     @NotNull
     @Override
     public ElementPattern<FileContent> createSuitableFilePattern() {
-        return FileContentPattern.fileContent().withName("dune-project");
+        return FileContentPattern.fileContent().withName(DuneFileType.INSTANCE.getName());
     }
 }

@@ -8,7 +8,7 @@ import com.intellij.openapi.components.PersistentStateComponent;
 import com.intellij.openapi.components.State;
 import com.intellij.openapi.components.Storage;
 import com.intellij.util.xmlb.XmlSerializerUtil;
-import com.reason.Platform;
+import com.reason.ide.ORModuleManager;
 import org.jetbrains.annotations.NotNull;
 
 @State(name = "EsyFacetConfiguration", storages = {@Storage("ocaml-dune.xml")})
@@ -20,7 +20,7 @@ public class EsyFacetConfiguration implements FacetConfiguration, PersistentStat
     @Override
     public FacetEditorTab[] createEditorTabs(FacetEditorContext editorContext, FacetValidatorsManager validatorsManager) {
         if (editorContext.isNewFacet()) {
-            isEsyEnabled = Platform.isEsyModule(editorContext.getModule());
+            isEsyEnabled = ORModuleManager.isEsyModule(editorContext.getModule());
         }
         return new FacetEditorTab[]{new EsyFacetEditor(editorContext, this)};
     }
