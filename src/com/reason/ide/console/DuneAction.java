@@ -21,7 +21,7 @@ public class DuneAction {
     public static class Clean extends CompilerAction {
 
         public Clean() {
-            super("Clean", "Clean", AllIcons.Actions.Compile);
+            super("Clean", "Clean", AllIcons.Actions.CloseHovered);
         }
 
         @Override
@@ -33,7 +33,7 @@ public class DuneAction {
     public static class Install extends CompilerAction {
 
         public Install() {
-            super("Install", "Install", AllIcons.Actions.Compile);
+            super("Install", "Install", AllIcons.Actions.Install);
         }
 
         @Override

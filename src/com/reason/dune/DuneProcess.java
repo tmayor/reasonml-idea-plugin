@@ -8,13 +8,13 @@ import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.projectRoots.Sdk;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.reason.OCamlSdkType;
+import com.reason.ORNotification;
 import com.reason.Platform;
 import com.reason.compiler.Compiler;
 import com.reason.compiler.CompilerProcess;
 import com.reason.ide.ORModuleManager;
-import com.reason.ide.ORNotification;
 import com.reason.ide.console.CliType;
+import com.reason.sdk.OCamlSdkType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 

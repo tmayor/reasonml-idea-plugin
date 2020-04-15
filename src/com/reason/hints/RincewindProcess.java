@@ -7,9 +7,9 @@ import com.intellij.openapi.editor.LogicalPosition;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.reason.Log;
+import com.reason.ORNotification;
 import com.reason.Streams;
 import com.reason.ide.FileManager;
-import com.reason.ide.ORNotification;
 import com.reason.ide.hints.InferredTypesImplementation;
 import org.jetbrains.annotations.NotNull;
 
