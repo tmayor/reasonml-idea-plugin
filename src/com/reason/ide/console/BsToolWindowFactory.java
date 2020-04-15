@@ -19,7 +19,7 @@ import javax.swing.*;
 
 public class BsToolWindowFactory extends ORToolWindowFactory {
 
-    public static final String IDENTIFIER = "bs-tool-window";
+    public static final String IDENTIFIER = "BuckleScript:";
 
     public static final Icon ICON = Icons.BUCKLESCRIPT_TOOL;
 

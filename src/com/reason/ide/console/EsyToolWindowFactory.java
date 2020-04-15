@@ -19,7 +19,7 @@ import javax.swing.*;
 
 public class EsyToolWindowFactory extends ORToolWindowFactory {
 
-    public static final String IDENTIFIER = "esy-tool-window";
+    public static final String IDENTIFIER = "Esy:";
 
     public static final Icon ICON = Icons.ESY_TOOL;
 

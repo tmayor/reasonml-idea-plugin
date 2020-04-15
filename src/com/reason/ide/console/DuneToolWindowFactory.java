@@ -19,7 +19,7 @@ import javax.swing.*;
 
 public class DuneToolWindowFactory extends ORToolWindowFactory {
 
-    public static final String IDENTIFIER = "dune-tool-window";
+    public static final String IDENTIFIER = "Dune:";
 
     public static final Icon ICON = Icons.DUNE_TOOL;
 
