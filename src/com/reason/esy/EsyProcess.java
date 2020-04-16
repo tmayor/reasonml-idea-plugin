@@ -157,7 +157,6 @@ public class EsyProcess implements CompilerProcess {
   public ProcessHandler recreate(@NotNull CliType cliType, @Nullable ProcessTerminated onProcessTerminated) {
     killIt();
     GeneralCommandLine cli = newCommandLine((CliType.Esy) cliType);
-    ProcessHandler processHandler;
     try {
       processHandler = new KillableColoredProcessHandler(cli);
     } catch (ExecutionException e) {
@@ -184,16 +183,10 @@ public class EsyProcess implements CompilerProcess {
 
   private GeneralCommandLine newCommandLine(CliType.Esy cliType) {
     GeneralCommandLine commandLine;
-    if (SystemInfo.isWindows) {
-      commandLine = new GeneralCommandLine("cmd.exe");
-      commandLine.addParameter("/c");
-    } else {
-      commandLine = new GeneralCommandLine("sh");
-      commandLine.addParameter("-c");
-    }
+    commandLine = new GeneralCommandLine(esyExecutable.toString());
     commandLine.setWorkDirectory(workingDir.toFile());
     commandLine.setRedirectErrorStream(redirectErrors);
-    commandLine.addParameter(esyExecutable + " " + getCommand(cliType)); // 'esy + command' must be a single parameter
+    commandLine.addParameter(getCommand(cliType)); // 'esy + command' must be a single parameter
     return commandLine;
   }
 
