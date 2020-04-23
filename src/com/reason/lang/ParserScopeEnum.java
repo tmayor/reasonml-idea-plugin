@@ -30,9 +30,11 @@ public enum ParserScopeEnum {
 
     let,
     letNamed,
+    letNamedAttribute,
     letNamedEq,
     letNamedSignature,
     letNamedBinding,
+    deconstruction,
 
     function,
     functionParameters,
@@ -40,6 +42,7 @@ public enum ParserScopeEnum {
     functionParameterNamed,
     functionParameterNamedSignature,
     functionParameterNamedSignatureItem,
+    functionParameterNamedBinding,
     functionBody,
     functionCall,
     functionCallParams,
@@ -76,6 +79,7 @@ public enum ParserScopeEnum {
     brace,
     bracket,
 
+    jsObject,
     object,
     objectField,
     objectFieldNamed,
@@ -95,6 +99,11 @@ public enum ParserScopeEnum {
 
     try_,
     tryScope,
+
+    variant,
+    variantConstructor,
+    variantConstructorParameters,
+    variantConstructorParameter,
 
     patternMatch,
     patternMatchVariant,
@@ -161,6 +170,5 @@ public enum ParserScopeEnum {
     moduleNamedSignatureEq, array, objectScope, clazzDeclaration, clazz, clazzNamed, clazzNamedEq,
     clazzBodyScope, clazzConstructor, clazzField, clazzFieldNamed, clazzMethod, clazzMethodNamed, clazzNamedParameters,
     clazzNamedConstructor, record, mixin, externalNamedSignatureEq, maybeRecordUsage, recordUsage, letNamedBindingFunction,
-    typeBinding, recordFieldAnnotation, option, optionParameter, name, variant, variantConstructor,
-    variantConstructorParameter, variantConstructorParameters, unit,  localObjectOpen
+    typeBinding, recordFieldAnnotation, option, optionParameter, name, unit, localObjectOpen
 }

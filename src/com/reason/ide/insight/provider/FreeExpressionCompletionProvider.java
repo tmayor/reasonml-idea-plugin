@@ -1,5 +1,7 @@
 package com.reason.ide.insight.provider;
 
+import java.util.*;
+import org.jetbrains.annotations.NotNull;
 import com.intellij.codeInsight.completion.CompletionResultSet;
 import com.intellij.codeInsight.completion.InsertionContext;
 import com.intellij.codeInsight.lookup.LookupElement;
@@ -12,79 +14,87 @@ import com.intellij.psi.PsiNameIdentifierOwner;
 import com.intellij.psi.PsiNamedElement;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.util.PsiIconUtil;
-import com.reason.Icons;
+import icons.ORIcons;
 import com.reason.Log;
 import com.reason.ide.IconProvider;
 import com.reason.ide.files.FileBase;
 import com.reason.ide.files.FileHelper;
 import com.reason.ide.search.FileModuleIndexService;
-import com.reason.ide.search.IndexedFileModule;
 import com.reason.ide.search.PsiFinder;
 import com.reason.lang.QNameFinder;
-import com.reason.lang.core.psi.*;
+import com.reason.lang.core.psi.PsiAnnotation;
+import com.reason.lang.core.psi.PsiException;
+import com.reason.lang.core.psi.PsiExternal;
+import com.reason.lang.core.psi.PsiInnerModule;
+import com.reason.lang.core.psi.PsiLet;
+import com.reason.lang.core.psi.PsiModule;
+import com.reason.lang.core.psi.PsiType;
+import com.reason.lang.core.psi.PsiVal;
+import com.reason.lang.core.psi.PsiVariantDeclaration;
 import com.reason.lang.core.signature.PsiSignatureUtil;
-import org.jetbrains.annotations.NotNull;
 
-import java.util.Collection;
-import java.util.EnumSet;
-import java.util.Set;
-import java.util.stream.Collectors;
+import static com.reason.lang.core.ORFileType.interfaceOrImplementation;
+import static com.reason.lang.core.psi.ExpressionScope.pub;
 
 public class FreeExpressionCompletionProvider {
 
     private static final Log LOG = Log.create("insight.free");
 
-    public static void addCompletions(@NotNull QNameFinder qnameFinder, @NotNull String containingFilePath, @NotNull PsiElement element, @NotNull CompletionResultSet resultSet) {
+    public static void addCompletions(@NotNull QNameFinder qnameFinder, @NotNull String containingFilePath, @NotNull PsiElement element,
+                                      @NotNull CompletionResultSet resultSet) {
         LOG.debug("FREE expression completion");
 
         Project project = element.getProject();
+        FileBase containingFile = (FileBase) element.getContainingFile();
         GlobalSearchScope scope = GlobalSearchScope.allScope(project);
-
-        FileModuleIndexService fileFinder = FileModuleIndexService.getService();
+        PsiFinder psiFinder = PsiFinder.getInstance(project);
+        FileModuleIndexService fileIndex = FileModuleIndexService.getService();
 
         // Add virtual namespaces
-        Collection<String> namespaces = fileFinder.getNamespaces(project);
+        Collection<String> namespaces = fileIndex.getNamespaces(project);
         LOG.debug("  namespaces", namespaces);
+
         for (String namespace : namespaces) {
             resultSet.addElement(LookupElementBuilder.
                     create(namespace).
                     withTypeText("Generated namespace").
-                    withIcon(Icons.VIRTUAL_NAMESPACE));
+                    withIcon(ORIcons.VIRTUAL_NAMESPACE));
         }
 
         // Add file modules (that are not a component and without namespaces)
-        Collection<IndexedFileModule> filesWithoutNamespace = fileFinder.getFilesWithoutNamespace(project, scope).
-                stream().
-                filter(indexedFileModule -> !containingFilePath.equals(indexedFileModule.getPath()) && !indexedFileModule.getModuleName().equals("Pervasives")).
-                collect(Collectors.toList());
+        // everything scope is needed to retrieve files from node_modules
+        Collection<FileBase> fileModules = fileIndex.getFiles/*WithoutNamespace*/(project, scope);
         if (LOG.isDebugEnabled()) {
-            LOG.debug("  files without namespaces", filesWithoutNamespace);
+            LOG.debug("  files without namespaces", fileModules);
         }
 
-        for (IndexedFileModule file : filesWithoutNamespace) {
-            resultSet.addElement(LookupElementBuilder.
-                    create(file.getModuleName()).
-                    withTypeText(FileHelper.shortLocation(project, file.getPath())).
-                    withIcon(IconProvider.getFileModuleIcon(file.isOCaml(), file.isInterface())));
-        }
-
-        PsiFinder psiFinder = PsiFinder.getInstance(project);
-        Set<String> paths = qnameFinder.extractPotentialPaths(element, EnumSet.noneOf(QNameFinder.Includes.class), false);
+        Set<String> paths = qnameFinder.extractPotentialPaths(element);
+        paths.add("Pervasives");
         LOG.debug("potential paths", paths);
+
+        for (FileBase fileModule : fileModules) {
+            String moduleName = fileModule.getModuleName();
+            if (moduleName != null && !paths.contains(moduleName)) {
+                resultSet.addElement(LookupElementBuilder.
+                        create(fileModule.getModuleName()).
+                        withTypeText(FileHelper.shortLocation(project, fileModule.getVirtualFile().getPath())).
+                        withIcon(IconProvider.getFileModuleIcon(fileModule)));
+            }
+        }
 
         // Add paths (opens and local opens for example)
         for (String path : paths) {
-            PsiModule module = psiFinder.findModuleFromQn(path);
-            if (module != null) {
+            Set<PsiModule> modulesFromQn = psiFinder.findModulesFromQn(path, interfaceOrImplementation, scope);
+            for (PsiModule module : modulesFromQn) {
                 if (module instanceof FileBase) {
-                    if (module.equals(element.getContainingFile())) {
+                    if (module.getContainingFile().equals(containingFile)) {
                         // if the module is already the containing file, we do nothing,
                         // local expressions will be added after
                         continue;
                     }
                 }
 
-                Collection<PsiNameIdentifierOwner> expressions = module.getExpressions();
+                Collection<PsiNameIdentifierOwner> expressions = module.getExpressions(pub);
                 for (PsiNamedElement expression : expressions) {
                     if (!(expression instanceof PsiAnnotation)) {
                         resultSet.addElement(LookupElementBuilder.
@@ -104,27 +114,23 @@ public class FreeExpressionCompletionProvider {
         }
 
         while (item != null) {
-            if (item instanceof PsiInclude) {
-                PsiModule moduleFromQn = psiFinder.findModuleFromQn(((PsiInclude) item).getQualifiedName());
-                if (moduleFromQn != null) {
-                    for (PsiNamedElement expression : moduleFromQn.getExpressions()) {
-                        resultSet.addElement(LookupElementBuilder.
-                                create(expression).
-                                withTypeText(PsiSignatureUtil.getSignature(expression, element.getLanguage())).
-                                withIcon(PsiIconUtil.getProvidersIcon(element, 0)));
-                        if (item instanceof PsiType) {
-                            expandType((PsiType) item, resultSet);
-                        }
+            if (item instanceof PsiInnerModule || item instanceof PsiLet || item instanceof PsiType || item instanceof PsiExternal
+                    || item instanceof PsiException || item instanceof PsiVal) {
+                if (item instanceof PsiLet && ((PsiLet) item).isDeconsruction()) {
+                    for (PsiElement deconstructedElement : ((PsiLet) item).getDeconstructedElements()) {
+                        resultSet.addElement(LookupElementBuilder.create(deconstructedElement.getText()).
+                                withTypeText(PsiSignatureUtil.getSignature(item, element.getLanguage())).
+                                withIcon(ORIcons.LET));
                     }
-                }
-            } else if (item instanceof PsiInnerModule || item instanceof PsiLet || item instanceof PsiType || item instanceof PsiExternal || item instanceof PsiException || item instanceof PsiVal) {
-                PsiNamedElement expression = (PsiNamedElement) item;
-                resultSet.addElement(LookupElementBuilder.
-                        create(expression).
-                        withTypeText(PsiSignatureUtil.getSignature(expression, element.getLanguage())).
-                        withIcon(PsiIconUtil.getProvidersIcon(expression, 0)));
-                if (item instanceof PsiType) {
-                    expandType((PsiType) item, resultSet);
+                } else {
+                    PsiNamedElement expression = (PsiNamedElement) item;
+                    resultSet.addElement(LookupElementBuilder.
+                            create(expression).
+                            withTypeText(PsiSignatureUtil.getSignature(expression, element.getLanguage())).
+                            withIcon(PsiIconUtil.getProvidersIcon(expression, 0)));
+                    if (item instanceof PsiType) {
+                        expandType((PsiType) item, resultSet);
+                    }
                 }
             }
 

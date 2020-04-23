@@ -1,93 +1,57 @@
 package com.reason.ide.go;
 
-import com.intellij.navigation.ChooseByNameContributor;
-import com.intellij.navigation.ItemPresentation;
-import com.intellij.navigation.NavigationItem;
-import com.intellij.openapi.project.Project;
-import com.intellij.pom.Navigatable;
-import com.intellij.psi.PsiElement;
-import com.intellij.psi.search.GlobalSearchScope;
-import com.intellij.psi.stubs.StubIndex;
-import com.intellij.util.ArrayUtil;
-import com.reason.ide.search.FileModuleIndexService;
-import com.reason.ide.search.PsiFinder;
-import com.reason.ide.search.index.IndexKeys;
-import com.reason.lang.core.ORFileType;
-import com.reason.lang.core.psi.PsiModule;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.ArrayList;
-import java.util.Collection;
-
-import static com.intellij.psi.search.GlobalSearchScope.allScope;
-import static com.intellij.psi.search.GlobalSearchScope.projectScope;
+import com.intellij.navigation.ChooseByNameContributorEx;
+import com.intellij.navigation.GotoClassContributor;
+import com.intellij.navigation.NavigationItem;
+import com.intellij.openapi.project.Project;
+import com.intellij.psi.search.GlobalSearchScope;
+import com.intellij.util.Processor;
+import com.intellij.util.indexing.FindSymbolParameters;
+import com.intellij.util.indexing.IdFilter;
+import com.reason.ide.files.FileBase;
+import com.reason.ide.search.PsiFinder;
+import com.reason.ide.search.index.ModuleIndex;
+import com.reason.lang.core.ORFileType;
+import com.reason.lang.core.psi.PsiModule;
+import com.reason.lang.core.psi.PsiQualifiedElement;
 
 // Implements the goto class
-public class ORModuleContributor implements ChooseByNameContributor {
-    @NotNull
+public class ORModuleContributor implements GotoClassContributor, ChooseByNameContributorEx {
+
     @Override
-    public NavigationItem[] getItemsByName(@NotNull String name, String pattern, @NotNull Project project, boolean includeNonProjectItems) {
-        ArrayList<NavigationItem> items = new ArrayList<>();
-
-        GlobalSearchScope scope = includeNonProjectItems ? allScope(project) : projectScope(project);
-
-        Collection<PsiModule> modules = PsiFinder.getInstance(project).findModules(name, ORFileType.interfaceOrImplementation, scope);
-        for (PsiModule element : modules) {
-            items.add(new MlModuleNavigationItem(element, element.getName()));
+    public void processNames(@NotNull Processor<String> processor, @NotNull GlobalSearchScope scope, @Nullable IdFilter filter) {
+        Project project = scope.getProject();
+        if (project != null) {
+            ModuleIndex.getInstance().processAllKeys(project, processor);
         }
-
-        return items.toArray(new NavigationItem[0]);
     }
 
-    @NotNull
     @Override
-    public String[] getNames(@NotNull Project project, boolean includeNonProjectItems) {
-        ArrayList<String> modules = new ArrayList<>();
+    public void processElementsWithName(@NotNull String name, @NotNull Processor<NavigationItem> processor, @NotNull FindSymbolParameters parameters) {
+        Project project = parameters.getProject();
+        GlobalSearchScope scope = parameters.getSearchScope();
 
-        Collection<String> fileModules = FileModuleIndexService.getService().getAllModules(project);
-        Collection<String> allModuleNames = StubIndex.getInstance().getAllKeys(IndexKeys.MODULES, project);
-
-        modules.addAll(fileModules);
-        modules.addAll(allModuleNames);
-
-        return ArrayUtil.toStringArray(modules);
+        for (PsiModule psiModule : PsiFinder.getInstance(project).findModulesbyName(name, ORFileType.both, null, scope)) {
+            processor.process(psiModule);
+        }
     }
 
-    private static class MlModuleNavigationItem implements NavigationItem {
-        private final PsiElement m_element;
-        private final String m_name;
-
-        MlModuleNavigationItem(PsiElement element, String name) {
-            m_element = element;
-            m_name = name;
+    @Nullable
+    @Override
+    public String getQualifiedName(NavigationItem item) {
+        if (item instanceof FileBase) {
+            return ((FileBase) item).getModuleName();
+        } else if (item instanceof PsiQualifiedElement) {
+            return ((PsiQualifiedElement) item).getQualifiedName();
         }
+        return null;
+    }
 
-        @Nullable
-        @Override
-        public String getName() {
-            return m_name;
-        }
-
-        @Nullable
-        @Override
-        public ItemPresentation getPresentation() {
-            return ((NavigationItem) m_element).getPresentation();
-        }
-
-        @Override
-        public void navigate(boolean requestFocus) {
-            ((Navigatable) m_element).navigate(requestFocus);
-        }
-
-        @Override
-        public boolean canNavigate() {
-            return true;
-        }
-
-        @Override
-        public boolean canNavigateToSource() {
-            return true;
-        }
+    @Nullable
+    @Override
+    public String getQualifiedNameSeparator() {
+        return null;
     }
 }

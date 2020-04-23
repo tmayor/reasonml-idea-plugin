@@ -1,26 +1,30 @@
 package com.reason.lang.core.psi;
 
-import com.intellij.psi.NavigatablePsiElement;
-import com.intellij.psi.PsiNameIdentifierOwner;
-import com.intellij.psi.PsiQualifiedNamedElement;
+import java.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.util.Collection;
+import com.intellij.psi.NavigatablePsiElement;
+import com.intellij.psi.PsiNameIdentifierOwner;
 
 /**
  * Common interface to file-based modules and inner modules
  */
-public interface PsiModule extends PsiQualifiedNamedElement, NavigatablePsiElement, PsiStructuredElement {
+public interface PsiModule extends PsiQualifiedElement, NavigatablePsiElement, PsiStructuredElement {
 
     @Nullable
     String getAlias();
 
+    @Nullable
+    String getModuleName();
+
     @NotNull
-    Collection<PsiNameIdentifierOwner> getExpressions();
+    Collection<PsiNameIdentifierOwner> getExpressions(@NotNull ExpressionScope eScope);
 
     @Nullable
     PsiModule getModuleExpression(@Nullable String name);
+
+    @Nullable
+    PsiType getTypeExpression(@NotNull String name);
 
     @Nullable
     PsiLet getLetExpression(@Nullable String name);
@@ -28,4 +32,8 @@ public interface PsiModule extends PsiQualifiedNamedElement, NavigatablePsiEleme
     @Nullable
     PsiVal getValExpression(@Nullable String name);
 
+    boolean isInterface();
+
+    @NotNull
+    List<PsiLet> getLetExpressions();
 }

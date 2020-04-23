@@ -107,6 +107,8 @@ public class OclParser extends CommonParser<OclTypes> {
                 parseAssert(builder, state);
             } else if (tokenType == m_types.RAISE) {
                 parseRaise(builder, state);
+            } else if (tokenType == m_types.COMMA) {
+                parseComma(builder, state);
             }
             // while ... do ... done
             else if (tokenType == m_types.WHILE) {
@@ -176,7 +178,9 @@ public class OclParser extends CommonParser<OclTypes> {
                 parseDirectiveIf(builder, state);
             } else if (tokenType == m_types.DIRECTIVE_ELSE) {
                 parseDirectiveElse(/*builder,*/ state);
-            } else if (tokenType == m_types.DIRECTIVE_END) {
+            } else if (tokenType == m_types.DIRECTIVE_ELIF) {
+                parseDirectiveElif(/*builder,*/ state);
+            } else if (tokenType == m_types.DIRECTIVE_END || tokenType == m_types.DIRECTIVE_ENDIF) {
                 parseDirectiveEnd(/*builder,*/ state);
             }
 
@@ -201,6 +205,14 @@ public class OclParser extends CommonParser<OclTypes> {
         }
     }
 
+    private void parseComma(@NotNull PsiBuilder builder, @NotNull ParserState state) {
+        if (state.isCurrentContext(let) && state.isCurrentResolution(genericExpression)) {
+            // It must be a deconstruction
+            // let ( a |>,<| b ) = ..
+            state.updateCurrentResolution(deconstruction).updateCurrentCompositeElementType(m_types.C_DECONSTRUCTION);
+        }
+    }
+
     private void parseLArray(@NotNull PsiBuilder builder, @NotNull ParserState state) {
         state.add(markScope(builder, array, m_types.C_SCOPED_EXPR, m_types.LARRAY));
     }
@@ -214,6 +226,7 @@ public class OclParser extends CommonParser<OclTypes> {
 
     private void parseLt(@NotNull PsiBuilder builder, @NotNull ParserState state) {
         if (!state.isCurrentResolution(whileConditionLoop)) {
+            // |> < <| .. > ..
             state.add(markScope(builder, object, m_types.C_OBJECT, m_types.LT)).
                     advance().
                     add(mark(builder, object, objectField, m_types.C_OBJECT_FIELD));
@@ -647,8 +660,14 @@ public class OclParser extends CommonParser<OclTypes> {
             // Overloading an operator: external (...) = ...
             state.updateCurrentResolution(externalNamed).complete();
             state.add(markScope(builder, localOpenScope, m_types.C_SCOPED_EXPR, m_types.LPAREN));
+        } else if (state.isCurrentResolution(let)) {
+            // Overloading operator OR deconstructing a term
+            //  let |>(<| + ) =
+            //  let |>(<| a, b ) =
+            state.add(markScope(builder, let, genericExpression, m_types.C_SCOPED_EXPR, m_types.LPAREN));
         } else if (state.isCurrentResolution(val)) {
-            // Overloading an operator: val (...) = ...
+            // Overloading an operator
+            //   val |>(<| .. ) = ..
             state.updateCurrentResolution(valNamed).complete();
             state.add(markScope(builder, valNamedSymbol, m_types.C_SCOPED_EXPR, m_types.LPAREN));
         } else if (state.isCurrentResolution(clazzNamed)) {
@@ -898,6 +917,10 @@ public class OclParser extends CommonParser<OclTypes> {
     }
 
     private void parseDirectiveElse(/*@NotNull PsiBuilder builder,*/ @NotNull ParserState state) {
+        endLikeSemi(state);
+    }
+
+    private void parseDirectiveElif(/*@NotNull PsiBuilder builder,*/ @NotNull ParserState state) {
         endLikeSemi(state);
     }
 

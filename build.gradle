@@ -1,22 +1,23 @@
 plugins {
-    id 'org.jetbrains.intellij' version "0.4.15"
+    id 'org.jetbrains.intellij' version "0.4.18"
 }
 
-def pluginVersion = '0.84'
-def ideaVersion = '2019.2'
+def pluginVersion = '0.88.0'
+def ideaVersion = '2019.3'
 version = pluginVersion + '-' + ideaVersion
 
 patchPluginXml {
-    // http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html
-    sinceBuild = '192'
-    untilBuild = '192.*'
-
-    pluginDescription "Add support for ReasonML language. Also add support for OCaml, and Dune."
     changeNotes """
         <ul>
-            <li>197 - java.lang.Throwable: Assertion failed: Undoable actions allowed inside commands only</li>
-            <li>192 - Undoing causes Following files have changes that cannot be undone: error</li>
-            <li>Fix a stub exception for functor parameter</li>
+            <li>You can easily download OCaml SDK sources in SDK platform settings</li>
+            <li>#231 - Fix ClassCastException when reading bsconfig.json</li>
+            <li>#220 - Added BuckleScript file type and icon</li> 
+            <li>#219 - Added file type support for Esy</li>
+            <li>Poly-variants can have a different highlighting, color scheme updated</li>
+            <li>Use SVG icons</li>
+            <li>#224 - Use bsb.exe instead of node.js wrapper in monorepo</li>
+            <li>#221 - Compilers have separate tool windows</li> 
+            <li>Use rincewind@0.8</li>
         </ul>
 
         <p><a href="https://github.com/reasonml-editor/reasonml-idea-plugin/blob/master/CHANGELOG.md">Full change log...</a></p>
@@ -47,12 +48,12 @@ allprojects {
     intellij {
         pluginName 'reasonml-plugin-idea'
         type 'IU'
-        version '192.7142.36' // https://www.jetbrains.com/intellij-repository/releases
+        version '193.5233.102' // https://www.jetbrains.com/intellij-repository/releases
         updateSinceUntilBuild = false
-        plugins = [
-                'java',
-                'JavaScriptLanguage',
-                'PsiViewer:192-SNAPSHOT' // https://plugins.jetbrains.com/plugin/227-psiviewer/versions
+        plugins = ['java',
+                   'JavaScriptLanguage',
+                   'com.jetbrains.hackathon.indices.viewer:1.3',
+                   'PsiViewer:193-SNAPSHOT' // https://plugins.jetbrains.com/plugin/227-psiviewer/versions
         ]
     }
 
@@ -90,3 +91,7 @@ idea {
 verifyPlugin {
     pluginDirectory "resources"
 }
+
+/*
+git log --oneline | Select-String -Pattern "(191|192|193) -" | %{$_.Line.Split(" ")[0]}
+*/

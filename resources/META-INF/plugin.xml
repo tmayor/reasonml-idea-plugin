@@ -2,14 +2,14 @@
     <id>reasonml</id>
     <name>ReasonML</name>
     <vendor email="giraud.contact@yahoo.fr" url="https://github.com/giraud/reasonml-idea-plugin">H.Giraud</vendor>
+    <description><![CDATA[Add support for ReasonML language. Also add support for OCaml, and Dune.]]></description>
 
-    <!-- These 2 tags are overwritten during build, see build.gradle -->
-    <!-- We keep them in plugin.xml so that verifyPlugin task succeed -->
+    <!-- This tags is overwritten during build, see build.gradle -->
+    <!-- We keep it in plugin.xml so that verifyPlugin task succeed -->
     <version>0.0</version>
-    <description><![CDATA[This is a description to please the validation plugin]]></description>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/build_number_ranges.html for description -->
-    <idea-version since-build="192" until-build="192.*"/>
+    <idea-version since-build="193" until-build="193.*"/>
 
     <!-- please see http://www.jetbrains.org/intellij/sdk/docs/basics/getting_started/plugin_compatibility.html
          on how to target different products -->
@@ -17,30 +17,41 @@
 
     <depends optional="true" config-file="js-deps.xml">JavaScript</depends>
 
-    <application-components>
-        <component>
-            <implementation-class>com.reason.ide.CompilerManager</implementation-class>
-        </component>
-    </application-components>
-
-    <project-components>
-        <component>
-            <implementation-class>com.reason.ide.ORProjectTracker</implementation-class>
-        </component>
-    </project-components>
-
     <actions>
+        <!-- CONSOLE ACTIONS - BUCKLESCRIPT -->
         <!--suppress PluginXmlCapitalization -->
-        <action id="reason.actions.make" class="com.reason.ide.console.MakeAction" text="Bsb -make"/>
+        <action id="bs.actions.make" class="com.reason.ide.console.BsMakeAction" text="Bsb -make"/>
         <!--suppress PluginXmlCapitalization -->
-        <action id="reason.actions.makeWorld" class="com.reason.ide.console.MakeWorldAction" text="bsb -clean-world -make-world"/>
+        <action id="bs.actions.makeWorld" class="com.reason.ide.console.BsMakeWorldAction"
+                text="bsb -clean-world -make-world"/>
+
+        <!-- CONSOLE ACTIONS - DUNE -->
+        <!--suppress PluginXmlCapitalization -->
+        <action id="dune.actions.build" class="com.reason.ide.console.DuneBuildAction" text="Dune build"/>
+        <!--suppress PluginXmlCapitalization -->
+        <action id="dune.actions.clean" class="com.reason.ide.console.DuneCleanAction" text="Dune clean"/>
+        <!--suppress PluginXmlCapitalization -->
+        <action id="dune.actions.install" class="com.reason.ide.console.DuneInstallAction" text="Dune install"/>
+
+        <!-- CONSOLE ACTIONS - ESY -->
+        <!--suppress PluginXmlCapitalization -->
+        <action id="esy.actions.build" class="com.reason.ide.console.EsyBuildAction" text="Esy build"/>
+        <!--suppress PluginXmlCapitalization -->
+        <action id="esy.actions.install" class="com.reason.ide.console.EsyInstallAction" text="Esy install"/>
+        <!--suppress PluginXmlCapitalization -->
+        <action id="esy.actions.shell" class="com.reason.ide.console.EsyShellAction" text="Esy shell"/>
+
         <!--suppress PluginXmlCapitalization -->
         <action id="reason.actions.refmt" class="com.reason.ide.actions.ReformatAction" text="Reformat code (refmt)">
             <add-to-group group-id="CodeFormatGroup" anchor="after" relative-to-action="ReformatCode"/>
-            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt shift R"/>
+            <keyboard-shortcut keymap="$default" first-keystroke="ctrl alt r"/>
         </action>
         <action id="reason.actions.convert" class="com.reason.ide.actions.ConvertAction"
                 text="Convert Reason-OCaml" description="Convert between Reason and OCaml code">
+            <add-to-group group-id="EditMenu" anchor="last"/>
+        </action>
+        <action id="reason.actions.transform" class="com.reason.ide.actions.TransformAction"
+                text="Convert Reason-OCaml (new file)" description="Convert between Reason and OCaml code in a new file">
             <add-to-group group-id="EditMenu" anchor="last"/>
         </action>
         <action id="reason.actions.testData.Navigate" class="com.reason.ide.testAssistant.GotoTestDataAction"
@@ -48,30 +59,72 @@
         </action>
     </actions>
 
+    <!--
+    lang:     https://upsource.jetbrains.com/idea-ce/file/idea-ce-37502bec42258b27d4547dbe8593ba3427bfcc49/platform/platform-resources/src/META-INF/LangExtensionPoints.xml
+    platform: https://upsource.jetbrains.com/idea-ce/file/idea-ce-e9f8dd0cfdfe1a70011a5694d7da93dee387ca7b/platform/platform-resources/src/META-INF/PlatformExtensionPoints.xml
+    vcs:      https://upsource.jetbrains.com/idea-ce/file/idea-ce-37502bec42258b27d4547dbe8593ba3427bfcc49/platform/platform-resources/src/META-INF/VcsExtensionPoints.xml
+    -->
     <extensions defaultExtensionNs="com.intellij">
+
+        <postStartupActivity implementation="com.reason.ide.ORPostStartupActivity"/>
+
+        <!--
+         | Listeners
+         -->
+
+        <projectService serviceImplementation="com.reason.ide.ORProjectRootListener"/>
+        <projectService serviceImplementation="com.reason.ide.ORFileDocumentListener"/>
+        <editorFactoryListener implementation="com.reason.ide.OREditorTracker$AppLevelEditorFactoryListener"/>
+        <vfs.asyncListener implementation="com.reason.ide.ORVirtualFileListener"/>
+
         <!--
          | File types
          -->
 
         <!-- Reason -->
-        <fileType extensions="rei" name="Reason interface file" fieldName="INSTANCE" language="Reason" implementationClass="com.reason.ide.files.RmlInterfaceFileType"/>
-        <fileType extensions="re" name="Reason file" fieldName="INSTANCE" language="Reason" implementationClass="com.reason.ide.files.RmlFileType"/>
+        <fileType extensions="rei" name="Reason interface file" fieldName="INSTANCE" language="Reason"
+                  implementationClass="com.reason.ide.files.RmlInterfaceFileType"/>
+        <fileType extensions="re" name="Reason file" fieldName="INSTANCE" language="Reason"
+                  implementationClass="com.reason.ide.files.RmlFileType"/>
         <!-- OCaml -->
-        <fileType extensions="mli" name="OCaml interface file" fieldName="INSTANCE" language="OCaml" implementationClass="com.reason.ide.files.OclInterfaceFileType"/>
-        <fileType extensions="ml" name="OCaml file" fieldName="INSTANCE" language="OCaml" implementationClass="com.reason.ide.files.OclFileType"/>
+        <fileType extensions="mli" name="OCaml interface file" fieldName="INSTANCE" language="OCaml"
+                  implementationClass="com.reason.ide.files.OclInterfaceFileType"/>
+        <fileType extensions="ml" name="OCaml file" fieldName="INSTANCE" language="OCaml"
+                  implementationClass="com.reason.ide.files.OclFileType"/>
         <!-- OCamlP4 -->
-        <fileType extensions="ml4" name="OCamlP4 file" fieldName="INSTANCE" language="OCamlP4" implementationClass="com.reason.ide.files.Ml4FileType"/>
+        <fileType extensions="ml4" name="OCamlP4 file" fieldName="INSTANCE" language="OCamlP4"
+                  implementationClass="com.reason.ide.files.Ml4FileType"/>
         <!-- OCamlMlg -->
-        <fileType extensions="mlg" name="MLG" fieldName="INSTANCE" language="Mlg" implementationClass="com.reason.ide.files.MlgFileType"/>
+        <fileType extensions="mlg" name="MLG" fieldName="INSTANCE" language="Mlg"
+                  implementationClass="com.reason.ide.files.MlgFileType"/>
         <!-- OCaml - Lex -->
-        <fileType extensions="mll" name="MLL" fieldName="INSTANCE" language="Mll" implementationClass="com.reason.ide.files.MllFileType"/>
+        <fileType extensions="mll" name="MLL" fieldName="INSTANCE" language="Mll"
+                  implementationClass="com.reason.ide.files.MllFileType"/>
         <!-- OCaml - Yacc -->
-        <fileType extensions="mly" name="Mly file" fieldName="INSTANCE" language="Mly" implementationClass="com.reason.ide.files.MlyFileType"/>
+        <fileType extensions="mly" name="Mly file" fieldName="INSTANCE" language="Mly"
+                  implementationClass="com.reason.ide.files.MlyFileType"/>
+        <!-- BuckleScript Configuration (bsconfig.json) -->
+        <fileType name="BuckleScript Configuration" fieldName="INSTANCE" language="JSON"
+                  fileNames="bsconfig.json"
+                  implementationClass="com.reason.ide.files.BsConfigJsonFileType"/>
         <!-- Dune -->
-        <fileTypeFactory implementation="com.reason.ide.files.DuneFileTypeFactory"/>
+        <fileType name="Dune Configuration" fieldName="INSTANCE" language="Dune"
+                  fileNames="dune;dune-project;jbuild"
+                  implementationClass="com.reason.ide.files.DuneFileType"/>
         <!-- Binary -->
-        <fileType extensions="cmi" name="CMI" fieldName="INSTANCE" implementationClass="com.reason.ide.files.CmiFileType"/>
-        <fileType extensions="cmt" name="CMT" fieldName="INSTANCE" implementationClass="com.reason.ide.files.CmtFileType"/>
+        <fileType extensions="cmt" name="CMT" fieldName="INSTANCE"
+                  implementationClass="com.reason.ide.files.CmtFileType"/>
+
+        <!--
+         | File related
+         -->
+
+        <fileEditorProvider implementation="com.reason.ide.editors.CmtFileEditorProvider"/>
+
+        <internalFileTemplate name="OCaml Interface"/>
+        <internalFileTemplate name="OCaml Module"/>
+        <internalFileTemplate name="Reason Interface"/>
+        <internalFileTemplate name="Reason Module"/>
 
         <!--
          | Parsers
@@ -209,8 +262,8 @@
          | Compiler
          -->
 
+        <applicationService serviceImplementation="com.reason.ide.ORCompilerManager"/>
         <projectService serviceImplementation="com.reason.bs.BsProcess"/>
-
         <projectService serviceInterface="com.reason.bs.Bucklescript"
                         serviceImplementation="com.reason.bs.BucklescriptImpl"/>
 
@@ -223,18 +276,15 @@
 
         <!--<codeInsight.parameterNameHints language="Reason" implementationClass="SignatureProvider"/>-->
         <editor.linePainter implementation="com.reason.ide.hints.OREditorLinePainter"/>
-        <projectService serviceImplementation="com.reason.ide.hints.CmtFileListener"/>
         <projectService serviceImplementation="com.reason.hints.RincewindProcess"/>
-        <projectService serviceInterface="com.reason.hints.InsightManager" serviceImplementation="com.reason.hints.InsightManagerImpl"/>
+        <projectService serviceInterface="com.reason.hints.InsightManager"
+                        serviceImplementation="com.reason.hints.InsightManagerImpl"/>
 
         <!--
          | Others
          -->
 
         <projectService serviceImplementation="com.reason.bs.RefmtProcess"/>
-
-        <internalFileTemplate name="Reason Module"/>
-        <internalFileTemplate name="OCaml Module"/>
 
         <typedHandler implementation="com.reason.ide.ORTypedHandler" id="RmlTypedHandler"/>
 
@@ -269,7 +319,7 @@
         <completion.contributor language="Mly"
                                 implementationClass="com.reason.ide.insight.OclKeywordCompletionContributor"/>
 
-        <!-- Specifies semicolon-separated list of paths which should be added to the classpath of the compile server -->
+        <!-- Specifies semicolon-separated list of paths which should be added to the classpath of the compiler server -->
         <compileServer.plugin classpath="jps-plugin.jar"/>
 
         <languageInjector implementation="com.reason.ide.JsInjector"/>
@@ -305,8 +355,9 @@
          | UI
          -->
 
-        <toolWindow id="Bucklescript" anchor="bottom" icon="/icons/bucklescript.png"
-                    factoryClass="com.reason.ide.console.BsToolWindowFactory"/>
+        <toolWindow id="BuckleScript:" anchor="bottom" icon="ORIcons.bucklescriptTool" factoryClass="com.reason.ide.console.BsToolWindowFactory"/>
+        <toolWindow id="Dune:" anchor="bottom" icon="ORIcons.duneTool" factoryClass="com.reason.ide.console.DuneToolWindowFactory"/>
+        <toolWindow id="Esy:" anchor="bottom" icon="ORIcons.esyTool" factoryClass="com.reason.ide.console.EsyToolWindowFactory"/>
 
         <codeInsight.parameterInfo language="Reason"
                                    implementationClass="com.reason.ide.hints.ORParameterInfoHandlerWithTabActionSupport"/>

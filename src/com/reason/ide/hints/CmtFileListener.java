@@ -3,6 +3,7 @@ package com.reason.ide.hints;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import com.intellij.lang.Language;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.project.Project;
@@ -12,10 +13,9 @@ import com.reason.Log;
 import com.reason.Platform;
 import com.reason.bs.Bucklescript;
 import com.reason.hints.InsightManager;
-import com.reason.ide.CompilerManager;
-import com.reason.ide.FileManager;
-import com.reason.ide.ORProjectTracker;
-import com.reason.ide.files.CmiFileType;
+import com.reason.ide.ORCompilerManager;
+import com.reason.ide.ORFileManager;
+import com.reason.ide.OREditorTracker;
 import com.reason.ide.files.FileHelper;
 import com.reason.lang.ocaml.OclLanguage;
 import com.reason.lang.reason.RmlLanguage;
@@ -26,49 +26,47 @@ public class CmtFileListener {
 
     @NotNull
     private final Project m_project;
-    private final ORProjectTracker m_projectTracker;
 
     private CmtFileListener(@NotNull Project project) {
         m_project = project;
-        m_projectTracker = project.getComponent(ORProjectTracker.class);
     }
 
     public void onChange(@NotNull VirtualFile file) {
-        if (file.getFileType() instanceof CmiFileType) {
-            return;
-        }
+        Path relativeCmt;
 
-        InsightManager insightManager = ServiceManager.getService(m_project, InsightManager.class);
-
-        Path path = FileSystems.getDefault().getPath(file.getPath());
-        Path relativeCmti;
-
-        Compiler compiler = CompilerManager.getInstance().getCompiler(m_project);
+        Compiler compiler = ORCompilerManager.getInstance().getCompiler(m_project);
         if (compiler instanceof Bucklescript) {
             Path relativeRoot = FileSystems.getDefault().getPath("lib", "bs");
-            Path pathToWatch = getPathToWatch(m_project, relativeRoot);
-            relativeCmti = pathToWatch.relativize(path);
+            VirtualFile baseRoot = Platform.findORPackageJsonContentRoot(m_project);
+            Path pathToWatch = getPathToWatch(baseRoot, relativeRoot);
+            Path path = FileSystems.getDefault().getPath(file.getPath()).toAbsolutePath();
+
+            relativeCmt = pathToWatch == null ? null : pathToWatch.relativize(path);
         } else {
             Path relativeRoot = FileSystems.getDefault().getPath("_build", "default");
-            Path pathToWatch = getPathToWatch(m_project, relativeRoot);
-            relativeCmti = pathToWatch.relativize(path);
+            VirtualFile baseRoot = Platform.findORDuneContentRoot(m_project);
+            Path pathToWatch = getPathToWatch(baseRoot, relativeRoot);
+            Path path = FileSystems.getDefault().getPath(file.getPath()).toAbsolutePath();
+            relativeCmt = pathToWatch == null ? null : pathToWatch.relativize(path);
         }
 
-        LOG.info("Detected change on file " + relativeCmti + ", reading types");
+        if (relativeCmt != null) {
+            LOG.info("Detected change on file " + relativeCmt + ", reading types");
+            VirtualFile sourceFile = ORFileManager.toSource(m_project, file, relativeCmt);
+            if (sourceFile == null) {
+                LOG.warn("can't convert " + relativeCmt + " to " + ORFileManager.toRelativeSourceName(m_project, file, relativeCmt));
+            } else if (OREditorTracker.getInstance(m_project).isOpen(sourceFile)) {
+                InsightManager insightManager = ServiceManager.getService(m_project, InsightManager.class);
 
-        VirtualFile sourceFile = FileManager.toSource(m_project, file, relativeCmti);
-        if (sourceFile == null) {
-            LOG.warn("can't convert " + relativeCmti + " to " + FileManager.toRelativeSourceName(m_project, file, relativeCmti));
-        } else if (m_projectTracker.isOpen(sourceFile)) {
-            Language lang = FileHelper.isReason(sourceFile.getFileType()) ? RmlLanguage.INSTANCE : OclLanguage.INSTANCE;
-            insightManager.queryTypes(file, path, inferredTypes -> InferredTypesService.annotatePsiFile(m_project, lang, sourceFile, inferredTypes));
+                Language lang = FileHelper.isReason(sourceFile.getFileType()) ? RmlLanguage.INSTANCE : OclLanguage.INSTANCE;
+                Path path = FileSystems.getDefault().getPath(file.getPath()).toAbsolutePath();
+                insightManager.queryTypes(file, path, inferredTypes -> InferredTypesService.annotatePsiFile(m_project, lang, sourceFile, inferredTypes));
+            }
         }
     }
 
-    @NotNull
-    private Path getPathToWatch(@NotNull Project project, @NotNull Path relativeRoot) {
-        VirtualFile baseRoot = Platform.findBaseRoot(project);
-        Path basePath = FileSystems.getDefault().getPath(baseRoot.getPath());
-        return basePath.resolve(relativeRoot);
+    @Nullable
+    private Path getPathToWatch(@Nullable VirtualFile baseRoot, @NotNull Path relativeRoot) {
+        return baseRoot == null ? null : FileSystems.getDefault().getPath(baseRoot.getPath()).resolve(relativeRoot);
     }
 }

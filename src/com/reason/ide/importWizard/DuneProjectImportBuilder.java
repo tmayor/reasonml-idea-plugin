@@ -17,8 +17,8 @@ import com.intellij.openapi.vfs.LocalFileSystem;
 import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.packaging.artifacts.ModifiableArtifactModel;
 import com.intellij.projectImport.ProjectImportBuilder;
-import com.reason.Icons;
-import com.reason.OCamlSdkType;
+import icons.ORIcons;
+import com.reason.sdk.OCamlSdkType;
 import com.reason.module.OCamlModuleType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -47,7 +47,7 @@ public class DuneProjectImportBuilder extends ProjectImportBuilder {
 
     @Override
     public Icon getIcon() {
-        return Icons.DUNE;
+        return ORIcons.DUNE;
     }
 
     @Override

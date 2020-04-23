@@ -48,18 +48,24 @@ public class PsiElementFactory {
             return new PsiClassField(node);
         } else if (type == types.C_CLASS_METHOD) {
             return new PsiClassMethod(node);
+        } else if (type == types.C_DECONSTRUCTION) {
+            return new PsiDeconstruction(types, node);
         } else if (type == types.C_DIRECTIVE) {
             return new PsiDirective(node);
         } else if (type == types.C_MODULE_PATH) {
             return new PsiModulePath(node);
         } else if (type == types.C_LET_STMT) {
             return new PsiLetImpl(types, node);
+        } else if (type == types.C_LET_ATTR) {
+            return new PsiLetAttribute(node);
+        } else if (type == types.C_LET_BINDING) {
+            return new PsiLetBinding(node);
         } else if (type == types.C_VAL_EXPR) {
             return new PsiValImpl(types, node);
         } else if (type == types.C_ANNOTATION_EXPR) {
             return new PsiAnnotationImpl(types, node);
-        } else if (type == types.C_LET_BINDING) {
-            return new PsiLetBinding(node);
+        } else if (type == types.C_FAKE_MODULE) {
+            return new PsiFakeModule(types, node);
         } else if (type == types.C_FUN_CALL_PARAMS) {
             return new PsiFunctionCallParamsImpl(types, node);
         } else if (type == types.C_FUN_EXPR) {

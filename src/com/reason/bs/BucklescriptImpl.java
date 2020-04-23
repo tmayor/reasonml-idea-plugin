@@ -1,10 +1,5 @@
 package com.reason.bs;
 
-import java.io.*;
-import java.util.*;
-import javax.swing.*;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import com.intellij.execution.process.ProcessHandler;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.notification.NotificationType;
@@ -22,15 +17,17 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.wm.ToolWindow;
 import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.ui.content.Content;
-import com.reason.Platform;
-import com.reason.ProcessFinishedListener;
+import com.reason.*;
 import com.reason.hints.InsightManager;
-import com.reason.ide.ORNotification;
+import com.reason.ide.console.BsToolWindowFactory;
 import com.reason.ide.console.CliType;
 import com.reason.ide.settings.ReasonSettings;
-import gnu.trove.THashMap;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+import org.jetbrains.coverage.gnu.trove.THashMap;
 
-import static com.intellij.openapi.application.ApplicationManager.getApplication;
+import javax.swing.*;
+import java.util.Map;
 
 public class BucklescriptImpl implements Bucklescript {
 
@@ -48,7 +45,7 @@ public class BucklescriptImpl implements Bucklescript {
     @NotNull
     @Override
     public String getNamespace(@NotNull VirtualFile sourceFile) {
-        VirtualFile bsConfigFile = Platform.findBsConfigFromFile(m_project, sourceFile);
+        VirtualFile bsConfigFile = Platform.findAncestorBsconfig(m_project, sourceFile);
         if (bsConfigFile != null) {
             BsConfig bsConfig = getOrRefreshBsConfig(bsConfigFile);
             return bsConfig.getNamespace();
@@ -57,18 +54,24 @@ public class BucklescriptImpl implements Bucklescript {
     }
 
     //region Compiler
+    @Nullable
+    @Override
+    public VirtualFile findContentRoot(@NotNull Project project) {
+        return Platform.findORPackageJsonContentRoot(project);
+    }
+
     @Override
     public void refresh(@NotNull VirtualFile bsConfigFile) {
-        BsConfig updatedConfig = BsConfig.read(m_project, bsConfigFile);
+        BsConfig updatedConfig = BsConfigReader.read(bsConfigFile);
         m_configs.put(bsConfigFile.getCanonicalPath(), updatedConfig);
     }
 
     @Override
     public void run(@NotNull VirtualFile sourceFile, @NotNull CliType cliType, @Nullable ProcessTerminated onProcessTerminated) {
         if (!isDisabled() && ReasonSettings.getInstance(m_project).isEnabled()) {
-            VirtualFile bsConfigFile = Platform.findBsConfigFromFile(m_project, sourceFile);
-            if (bsConfigFile != null) {
-                getOrRefreshBsConfig(bsConfigFile);
+            VirtualFile bsconfigFile = Platform.findAncestorBsconfig(m_project, sourceFile);
+            if (bsconfigFile != null) {
+                getOrRefreshBsConfig(bsconfigFile);
                 BsProcess process = ServiceManager.getService(m_project, BsProcess.class);
                 if (process.start()) {
                     ProcessHandler bscHandler = process.recreate(sourceFile, cliType, onProcessTerminated);
@@ -82,11 +85,16 @@ public class BucklescriptImpl implements Bucklescript {
                         process.startNotify();
                         ServiceManager.getService(m_project, InsightManager.class).downloadRincewindIfNeeded(sourceFile);
                     } else {
-                        process.terminated();
+                        process.terminate();
                     }
                 }
             }
         }
+    }
+
+    @Override
+    public CompilerType getType() {
+        return CompilerType.BS;
     }
 
     @NotNull
@@ -107,26 +115,19 @@ public class BucklescriptImpl implements Bucklescript {
             return false;
         }
 
-        VirtualFile bsConfigFile = Platform.findBsConfigFromFile(m_project, file);
+        VirtualFile bsConfigFile = Platform.findAncestorBsconfig(m_project, file);
         return bsConfigFile == null || getOrRefreshBsConfig(bsConfigFile).accept(file.getPath());
     }
 
     @Override
-    public void convert(@NotNull VirtualFile virtualFile, boolean isInterface, @NotNull String fromFormat, @NotNull String toFormat,
-                        @NotNull Document document) {
+    @Nullable
+    public String convert(@NotNull VirtualFile virtualFile, boolean isInterface, @NotNull String fromFormat, @NotNull String toFormat,
+                          @NotNull Document document) {
         RefmtProcess refmt = RefmtProcess.getInstance(m_project);
         String oldText = document.getText();
         String newText = refmt.convert(virtualFile, isInterface, fromFormat, toFormat, oldText);
-        if (!oldText.isEmpty() && !newText.isEmpty()) { // additional protection
-            getApplication().runWriteAction(() -> {
-                CommandProcessor.getInstance().executeCommand(m_project, () -> document.setText(newText), "reason.refmt", "CodeFormatGroup");
-                try {
-                    virtualFile.rename(this, virtualFile.getNameWithoutExtension() + "." + toFormat);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            });
-        }
+        // additional protection
+        return oldText.isEmpty() || newText.isEmpty() ? null : newText;
     }
 
     // Try externalFormatProcessor
@@ -157,7 +158,6 @@ public class BucklescriptImpl implements Bucklescript {
                                 refmtCount(sourceFile, isInterface, format, document, retries + 1);
                             }
                         } else {
-
                             CommandProcessor.getInstance().executeCommand(m_project, () -> {
                                 WriteAction.run(() -> {
                                     document.setText(newText);
@@ -176,7 +176,7 @@ public class BucklescriptImpl implements Bucklescript {
     public ConsoleView getBsbConsole() {
         ConsoleView console = null;
 
-        ToolWindow window = ToolWindowManager.getInstance(m_project).getToolWindow("Bucklescript");
+        ToolWindow window = ToolWindowManager.getInstance(m_project).getToolWindow(BsToolWindowFactory.ID);
         Content windowContent = window.getContentManager().getContent(0);
         if (windowContent != null) {
             SimpleToolWindowPanel component = (SimpleToolWindowPanel) windowContent.getComponent();
@@ -187,6 +187,21 @@ public class BucklescriptImpl implements Bucklescript {
         }
 
         return console;
+    }
+
+    @Override
+    @NotNull
+    public Ninja readNinjaBuild(@Nullable VirtualFile contentRoot) {
+        String content = null;
+
+        if (contentRoot != null) {
+            VirtualFile ninja = contentRoot.findFileByRelativePath("lib/bs/build.ninja");
+            if (ninja != null) {
+                content = FileUtil.readFileContent(ninja);
+            }
+        }
+
+        return new Ninja(content);
     }
 
     private boolean isDisabled() {

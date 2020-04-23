@@ -1,5 +1,6 @@
 package com.reason.bs;
 
+import java.util.*;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.openapi.editor.Document;
 import com.intellij.openapi.vfs.VirtualFile;
@@ -14,10 +15,14 @@ public interface Bucklescript extends Compiler {
     @NotNull
     String getNamespace(@NotNull VirtualFile sourceFile);
 
-    void convert(@NotNull VirtualFile virtualFile, boolean isInterface, @NotNull String fromFormat, @NotNull String toFormat, @NotNull Document document);
+    @Nullable
+    String convert(@NotNull VirtualFile virtualFile, boolean isInterface, @NotNull String fromFormat, @NotNull String toFormat, @NotNull Document document);
 
     void refmt(@NotNull VirtualFile sourceFile, boolean isInterface, @NotNull String format, @NotNull Document document);
 
     @Nullable
     ConsoleView getBsbConsole();
+
+    @NotNull
+    Ninja readNinjaBuild(@Nullable VirtualFile contentRoot);
 }

@@ -1,6 +1,15 @@
 package com.reason.lang.ocaml;
 
-import com.reason.lang.core.stub.type.*;
+import com.reason.lang.core.stub.type.PsiExceptionStubElementType;
+import com.reason.lang.core.stub.type.PsiExternalStubElementType;
+import com.reason.lang.core.stub.type.PsiFakeModuleStubElementType;
+import com.reason.lang.core.stub.type.PsiLetStubElementType;
+import com.reason.lang.core.stub.type.PsiModuleStubElementType;
+import com.reason.lang.core.stub.type.PsiParameterStubElementType;
+import com.reason.lang.core.stub.type.PsiRecordFieldStubElementType;
+import com.reason.lang.core.stub.type.PsiTypeStubElementType;
+import com.reason.lang.core.stub.type.PsiValStubElementType;
+import com.reason.lang.core.stub.type.PsiVariantStubElementType;
 import com.reason.lang.core.type.ORCompositeElementType;
 import com.reason.lang.core.type.ORTokenElementType;
 import com.reason.lang.core.type.ORTypes;
@@ -10,6 +19,8 @@ public class OclTypes extends ORTypes {
     public static final OclTypes INSTANCE = new OclTypes();
 
     private OclTypes() {
+        C_FAKE_MODULE = new PsiFakeModuleStubElementType("C_FAKE_MODULE", OclLanguage.INSTANCE);
+
         // Stubbed element types
 
         C_EXTERNAL_STMT = new PsiExternalStubElementType("C_EXTERNAL_STMT", OclLanguage.INSTANCE);
@@ -33,12 +44,14 @@ public class OclTypes extends ORTypes {
         C_CLASS_STMT = new ORCompositeElementType("C_CLASS_STMT", OclLanguage.INSTANCE);
         C_CLASS_FIELD = new ORCompositeElementType("C_CLASS_FIELD", OclLanguage.INSTANCE);
         C_CLASS_METHOD = new ORCompositeElementType("C_CLASS_METHOD", OclLanguage.INSTANCE);
+        C_DECONSTRUCTION = new ORCompositeElementType("C_DECONSTRUCTION", OclLanguage.INSTANCE);
         C_DIRECTIVE = new ORCompositeElementType("C_DIRECTIVE", OclLanguage.INSTANCE);
         C_INCLUDE = new ORCompositeElementType("C_INCLUDE", OclLanguage.INSTANCE);
         C_FUN_CALL_PARAMS = new ORCompositeElementType("C_FUN_CALL_PARAMS", OclLanguage.INSTANCE);
         C_FUN_CALL_PARAM = new ORCompositeElementType("C_FUN_CALL_PARAM", OclLanguage.INSTANCE);
         C_FUN_EXPR = new ORCompositeElementType("C_FUN_EXPR", OclLanguage.INSTANCE);
         C_FUN_PARAMS = new ORCompositeElementType("C_FUN_PARAMS", OclLanguage.INSTANCE);
+        C_FUN_PARAM_BINDING = new ORCompositeElementType("C_FUN_PARAM_BINDING", OclLanguage.INSTANCE);
         C_FUN_BODY = new ORCompositeElementType("C_FUN_BODY", OclLanguage.INSTANCE);
         C_FUNCTOR = new ORCompositeElementType("C_FUNCTOR", OclLanguage.INSTANCE);
         C_FUNCTOR_BINDING = new ORCompositeElementType("C_FUNCTOR_BINDING", OclLanguage.INSTANCE);
@@ -48,6 +61,7 @@ public class OclTypes extends ORTypes {
         C_INTERPOLATION_PART = new ORCompositeElementType("C_INTERPOLATION_PART", OclLanguage.INSTANCE);
         C_INTERPOLATION_REF = new ORCompositeElementType("C_INTERPOLATION_REF", OclLanguage.INSTANCE);
         C_JS_OBJECT = new ORCompositeElementType("C_JS_OBJECT", OclLanguage.INSTANCE);
+        C_LET_ATTR = new ORCompositeElementType("C_LET_ATTR", OclLanguage.INSTANCE);
         C_LET_BINDING = new ORCompositeElementType("C_LET_BINDING", OclLanguage.INSTANCE);
         C_LOWER_SYMBOL = new ORCompositeElementType("C_LOWER_SYMBOL", OclLanguage.INSTANCE);
         C_MACRO_EXPR = new ORCompositeElementType("C_MACRO_EXPR", OclLanguage.INSTANCE);
@@ -121,7 +135,9 @@ public class OclTypes extends ORTypes {
         DIFF = new ORTokenElementType("DIFF", OclLanguage.INSTANCE);
         DIRECTIVE_IF = new ORTokenElementType("DIRECTIVE_IF", OclLanguage.INSTANCE);
         DIRECTIVE_ELSE = new ORTokenElementType("DIRECTIVE_ELSE", OclLanguage.INSTANCE);
+        DIRECTIVE_ELIF = new ORTokenElementType("DIRECTIVE_ELIF", OclLanguage.INSTANCE);
         DIRECTIVE_END = new ORTokenElementType("DIRECTIVE_END", OclLanguage.INSTANCE);
+        DIRECTIVE_ENDIF = new ORTokenElementType("DIRECTIVE_ENDIF", OclLanguage.INSTANCE);
         LT_OR_EQUAL = new ORTokenElementType("LT_OR_EQUAL", OclLanguage.INSTANCE);
         GT_OR_EQUAL = new ORTokenElementType("GT_OR_EQUAL", OclLanguage.INSTANCE);
         DOLLAR = new ORTokenElementType("DOLLAR", OclLanguage.INSTANCE);

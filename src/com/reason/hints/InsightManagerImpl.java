@@ -2,21 +2,23 @@ package com.reason.hints;
 
 import java.io.*;
 import java.nio.file.Path;
+import java.util.*;
 import java.util.concurrent.atomic.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import com.intellij.ide.plugins.IdeaPluginDescriptor;
-import com.intellij.ide.plugins.PluginManager;
 import com.intellij.openapi.components.ServiceManager;
-import com.intellij.openapi.extensions.PluginId;
 import com.intellij.openapi.progress.ProgressManager;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
+import com.reason.Log;
+import com.reason.Platform;
 import com.reason.bs.BsProcess;
 
 import static com.reason.Platform.getOsPrefix;
 
 public class InsightManagerImpl implements InsightManager {
+
+    private static final Log LOG = Log.create("hints");
 
     @NotNull
     AtomicBoolean isDownloading = new AtomicBoolean(false);
@@ -36,22 +38,6 @@ public class InsightManagerImpl implements InsightManager {
         }
     }
 
-    @Nullable
-    @Override
-    public File getRincewindFile(@NotNull VirtualFile sourceFile) {
-        String filename = getRincewindFilename(sourceFile);
-        if (filename == null) {
-            return null;
-        }
-
-        IdeaPluginDescriptor plugin = PluginManager.getPlugin(PluginId.getId("reasonml"));
-        if (plugin != null) {
-            return new File(plugin.getPath(), filename);
-        }
-
-        return new File(System.getProperty("java.io.tmpdir"), filename);
-    }
-
     @Override
     public void queryTypes(@NotNull VirtualFile sourceFile, @NotNull Path cmtPath, @NotNull ProcessTerminated runAfter) {
         File rincewindFile = getRincewindFile(sourceFile);
@@ -60,13 +46,69 @@ public class InsightManagerImpl implements InsightManager {
         }
     }
 
+    @NotNull
+    @Override
+    public List<String> dumpMeta(@NotNull VirtualFile cmtFile) {
+        RincewindProcess rincewindProcess = RincewindProcess.getInstance(m_project);
+
+        File rincewindFile = getRincewindFileExcludingVersion(cmtFile, "0.4");
+        return rincewindFile == null ? Collections.emptyList() : rincewindProcess.dumpMeta(rincewindFile.getPath(), cmtFile);
+    }
+
+    @NotNull
+    @Override
+    public String dumpTree(@NotNull VirtualFile cmtFile) {
+        RincewindProcess rincewindProcess = RincewindProcess.getInstance(m_project);
+
+        File rincewindFile = getRincewindFile(cmtFile);
+        return rincewindFile == null ? "<unknown/>" : rincewindProcess.dumpTree(cmtFile, rincewindFile.getPath());
+    }
+
+    @NotNull
+    @Override
+    public List<String> dumpInferredTypes(@NotNull VirtualFile cmtFile) {
+        RincewindProcess rincewindProcess = RincewindProcess.getInstance(m_project);
+
+        File rincewindFile = getRincewindFile(cmtFile);
+        return rincewindFile == null ? Collections.emptyList() : rincewindProcess.dumpTypes(rincewindFile.getPath(), cmtFile);
+    }
+
+    @Nullable
+    @Override
+    public File getRincewindFile(@NotNull VirtualFile sourceFile) {
+        return getRincewindFileExcludingVersion(sourceFile, "");
+    }
+
+    @Nullable
+    public File getRincewindFileExcludingVersion(@NotNull VirtualFile sourceFile, @NotNull String excludedVersion) {
+        String filename = getRincewindFilenameExcludingVersion(sourceFile, excludedVersion);
+        if (filename == null) {
+            if (LOG.isTraceEnabled()) {
+                LOG.trace("No rincewind file found for " + sourceFile + " (excluded: " + excludedVersion + ")");
+            }
+            return null;
+        }
+
+        File pluginLocation = Platform.getPluginLocation();
+        String pluginPath = pluginLocation == null ? System.getProperty("java.io.tmpdir") : pluginLocation.getPath();
+        if (LOG.isTraceEnabled()) {
+            LOG.trace("Rincewind filename: " + filename + " at " + pluginPath);
+        }
+        return new File(pluginPath, filename);
+    }
+
     @Nullable
     @Override
     public String getRincewindFilename(@NotNull VirtualFile sourceFile) {
+        return getRincewindFilenameExcludingVersion(sourceFile, "");
+    }
+
+    @Nullable
+    public String getRincewindFilenameExcludingVersion(@NotNull VirtualFile sourceFile, @NotNull String excludedVersion) {
         String ocamlVersion = ServiceManager.getService(m_project, BsProcess.class).getOCamlVersion(sourceFile);
         String rincewindVersion = getRincewindVersion(ocamlVersion);
 
-        if (ocamlVersion != null && rincewindVersion != null) {
+        if (ocamlVersion != null && rincewindVersion != null && !rincewindVersion.equals(excludedVersion)) {
             return "rincewind_" + getOsPrefix() + ocamlVersion + "-" + rincewindVersion + ".exe";
         }
 
@@ -83,6 +125,6 @@ public class InsightManagerImpl implements InsightManager {
             return "0.4";
         }
 
-        return "0.5";
+        return "0.8";
     }
 }

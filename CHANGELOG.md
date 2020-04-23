@@ -12,6 +12,45 @@
 
 ## Unreleased
 
+- :rocket: ![o] You can easily download OCaml SDK sources in SDK platform settings
+- :bug: [#231](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/231) Fix ClassCastException when reading bsconfig.json
+- :nail_care: [#220](https://github.com/reasonml-editor/reasonml-idea-plugin/pull/220) ![o] ![r] Added BuckleScript file type and icon by [@pooch](https://github.com/JohnPucciarelli) 
+- :nail_care: [#219](https://github.com/reasonml-editor/reasonml-idea-plugin/pull/219) ![o] ![r] Added file type support for Esy by [@pooch](https://github.com/JohnPucciarelli)
+- :nail_care: ![o] ![r] Poly-variants can have a different highlighting, color scheme updated
+- :nail_care: ![o] ![r] Use SVG icons
+- :house: [#224](https://github.com/reasonml-editor/reasonml-idea-plugin/pull/224) ![r] Use bsb.exe instead of node.js wrapper in monorepo by [@Coobaha](https://github.com/Coobaha)
+- :house: [#221](https://github.com/reasonml-editor/reasonml-idea-plugin/pull/221) ![o] ![r] Compilers have separate tool windows by [@pooch](https://github.com/JohnPucciarelli) 
+- :house: Use rincewind@0.8
+
+## 0.87.1 - 2020/04/03
+
+- :bug: [#214](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/214) Infinite indexing
+
+## 0.87 - 2020/03/12
+
+- :rocket: Compatible with bucklescript 7.2.2
+- :rocket: Add OCaml 4.10 to the list of downloadable SDKs
+- :bug: [#211](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/211) let%private support
+- :bug: [#209](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/209) Deep dependenciess are not indexed in IDE that have javascript functionality (ultimate/webstorm)
+- :house: Use rincewind 0.7 (support of OCaml 4.10)
+
+## 0.86.1 - 2020/02/21
+
+- Compatible with bucklescript 7.2
+- :rocket: ![r], [#204](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/204) New on-the-fly compilation to get faster inferred information
+- :bug: [#167](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/167) Go-to definition is not working correctly for deconstructed tuples
+
+## 0.85 - 2020/02/04
+
+- :rocket: File | New menu as OCaml and ReasonML templates
+- :rocket: Display cmt file in a custom editor
+- :rocket: [#200](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/200) OCaml SDK can be set at the module level
+- :house: Fix bsc path
+- :house: New indexing of file modules
+- :house: Use Rincewind 0.6
+- :house: [#199](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/199) Prepare for dynamic plugins
+- :house: [#196](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/196) Redesign content root finding
+
 ## 0.84 - 2019/12/10
 
 - :bug: [#197](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/197) java.lang.Throwable: Assertion failed: Undoable actions allowed inside commands only
@@ -81,7 +120,7 @@ many versions active. Older version of the plugin will be frozen and won't get a
 
 - :bug: [#173](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/173) Fixed exception in Webstorm: gutter icons are only available in java-based IDE
 - :bug: [#172](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/172) Fixed exceptions in 2019.2 EAP
-- :house: Jetbrains recommendation: moving project components to service components. Expected faster startup</li>
+- :house: Jetbrains recommendation: moving project components to service components. Expected faster startup
 
 ## 0.78.1 - 2019/06/24
 
@@ -99,9 +138,9 @@ many versions active. Older version of the plugin will be frozen and won't get a
 ## 0.76 - 2019/04/24
 
 - :rocket: Support for ocaml 4.0.6 (Bs 6+)
-- :bug: [#165](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/165) Autocompletion inside comments</li>
-- :bug: [#161](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/161) Indexing exception</li>
-- :bug: [#160](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/160) Autocompletion is not using module interface</li>
+- :bug: [#165](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/165) Autocompletion inside comments
+- :bug: [#161](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/161) Indexing exception
+- :bug: [#160](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/160) Autocompletion is not using module interface
 
 ## 0.75.1 - 2019/04/16
 
@@ -203,7 +242,7 @@ many versions active. Older version of the plugin will be frozen and won't get a
 - :rocket: ![r] Js language injection in [%raw] blocks
 - :nail_care: ![r] Better annotation parsing
 - :nail_care: ![r] ![o] Add missing keywords in highlighter
-- :bug: [#67](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/67) Curly braces intentions are broken</li>
+- :bug: [#67](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/67) Curly braces intentions are broken
 
 ## 0.63 - 2018/09/20
 
@@ -215,7 +254,7 @@ many versions active. Older version of the plugin will be frozen and won't get a
 
 ## 0.62.1 - 2018/09/06
 
-- :rocket: Add a 'make' button to the bs console</li>
+- :rocket: Add a 'make' button to the bs console
 - :bug: ![o] [#62](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/62) Awkward behavior when typing comments
 - :bug: [#27](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/27) Uncommenting nested comments is incorrect
 
@@ -229,7 +268,7 @@ many versions active. Older version of the plugin will be frozen and won't get a
 ## 0.60.2 - 2018/07/31
 
 - :nail_care: [#59](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/59) Colored output in Bucklescript tab
-- :bug: [#90](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/90) IllegalArgumentException when clicking on an entry in "Structures" to go to a symbol</li>
+- :bug: [#90](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/90) IllegalArgumentException when clicking on an entry in "Structures" to go to a symbol
 - :house: Parsers updated
 
 ## 0.59.1 - 2018/07/25
@@ -260,7 +299,7 @@ This release contains a big rewrite of how modules are referenced, it may break 
 
 - :rocket: Some record field completion
 - :bug: [#66](https://github.com/reasonml-editor/reasonml-idea-plugin/issues/66) Go To + module alias
-- :house: ![o] Better module path resolution</li>
+- :house: ![o] Better module path resolution
 - :house: Improved parsers
             
 ## 0.56
@@ -449,7 +488,7 @@ This release contains a big rewrite of how modules are referenced, it may break 
 
 ## 0.27
 
-* :bug: Fixed an IllegalArgumentException in KillableColoredProcessHandler</li>
+* :bug: Fixed an IllegalArgumentException in KillableColoredProcessHandler
 * :rocket: 
   * Structure view enabled for OCaml files
   * Inferring types using bsc if no merlin found (wip)

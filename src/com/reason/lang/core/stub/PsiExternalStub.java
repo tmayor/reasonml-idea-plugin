@@ -1,26 +1,33 @@
 package com.reason.lang.core.stub;
 
+import org.jetbrains.annotations.NotNull;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.stubs.NamedStubBase;
 import com.intellij.psi.stubs.StubElement;
 import com.intellij.util.io.StringRef;
-import com.reason.lang.core.psi.PsiLet;
-import org.jetbrains.annotations.NotNull;
+import com.reason.lang.core.psi.PsiExternal;
 
-public class PsiExternalStub extends NamedStubBase<PsiLet> {
+public class PsiExternalStub extends NamedStubBase<PsiExternal> {
+    private final String m_path;
     private final String m_qname;
     private final boolean m_isFunction;
 
-    public PsiExternalStub(StubElement parent, @NotNull IStubElementType elementType, String name, String qname, boolean isFunction) {
+    public PsiExternalStub(StubElement parent, @NotNull IStubElementType elementType, String name, String path, boolean isFunction) {
         super(parent, elementType, name);
-        m_qname = qname;
+        m_path = path;
+        m_qname = path + "." + name;
         m_isFunction = isFunction;
     }
 
-    public PsiExternalStub(StubElement parent, @NotNull IStubElementType elementType, StringRef name, String qname, boolean isFunction) {
+    public PsiExternalStub(StubElement parent, @NotNull IStubElementType elementType, StringRef name, String path, boolean isFunction) {
         super(parent, elementType, name);
-        m_qname = qname;
+        m_path = path;
+        m_qname = path + "." + name;
         m_isFunction = isFunction;
+    }
+
+    public String getPath() {
+        return m_path;
     }
 
     public String getQualifiedName() {

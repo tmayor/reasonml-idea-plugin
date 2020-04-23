@@ -1,15 +1,16 @@
 package com.reason;
 
-import com.intellij.openapi.diagnostic.Logger;
-import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiFile;
-import com.intellij.psi.PsiQualifiedNamedElement;
+import java.io.*;
+import java.nio.file.Path;
+import java.util.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-
-import java.io.File;
-import java.util.Collection;
-import java.util.Map;
+import com.intellij.openapi.diagnostic.Logger;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.vfs.VirtualFile;
+import com.intellij.psi.PsiFile;
+import com.intellij.psi.ResolveResult;
+import com.reason.lang.core.psi.PsiQualifiedElement;
 
 public class Log {
 
@@ -40,13 +41,25 @@ public class Log {
         }
     }
 
+    public void debug(String comment, Integer t) {
+        if (m_log.isDebugEnabled()) {
+            m_log.debug(comment + SEP + t);
+        }
+    }
+
     public void debug(String comment, int t) {
         if (m_log.isDebugEnabled()) {
             m_log.debug(comment + SEP + t);
         }
     }
 
-    public void debug(String comment, int t, @Nullable Collection t1) {
+    public void debug(String comment, long t) {
+        if (m_log.isDebugEnabled()) {
+            m_log.debug(comment + SEP + t);
+        }
+    }
+
+    public void debug(String comment, int t, @Nullable Collection<?> t1) {
         if (m_log.isDebugEnabled()) {
             m_log.debug(comment + SEP + t + (t1 != null && 1 == t1.size() ? " " + t1.iterator().next() : ""));
         }
@@ -79,6 +92,18 @@ public class Log {
     public void debug(String comment, @Nullable PsiFile[] t) {
         if (m_log.isDebugEnabled()) {
             m_log.debug(comment + SEP + (t == null ? "" : t.length + " "));
+        }
+    }
+
+    public void debug(String comment, Path t) {
+        if (m_log.isDebugEnabled()) {
+            m_log.debug(comment + SEP + (t == null ? "" : t + " "));
+        }
+    }
+
+    public void debug(String comment, @Nullable ResolveResult[] t) {
+        if (m_log.isDebugEnabled()) {
+            m_log.debug(comment + SEP + (t == null ? "" : t.length + " [" + Joiner.join(", ", t) + "]"));
         }
     }
 
@@ -118,19 +143,19 @@ public class Log {
         }
     }
 
-//    public void debug(String comment, List t) {
-//        if (m_log.isDebugEnabled()) {
-//            m_log.debug(comment + SEP + (t == null ? "" : t.size() + " ") + "[" + Joiner.join(", ", t) + "]");
-//        }
-//    }
+    public void trace(String comment, @Nullable Collection<?> t) {
+        if (m_log.isDebugEnabled()) {
+            m_log.debug(comment + SEP + (t == null ? "" : t.size() + " ") + "[" + Joiner.join(", ", t) + "]");
+        }
+    }
 
-    public void debug(String comment, @NotNull PsiQualifiedNamedElement element) {
+    public void debug(String comment, @NotNull PsiQualifiedElement element) {
         if (m_log.isDebugEnabled()) {
             m_log.debug(comment + SEP + element.getQualifiedName() + " (" + element.getContainingFile().getVirtualFile().getPath() + ")");
         }
     }
 
-    public void debug(String comment, @NotNull PsiQualifiedNamedElement element, int position) {
+    public void debug(String comment, @NotNull PsiQualifiedElement element, int position) {
         if (m_log.isDebugEnabled()) {
             m_log.debug(comment + SEP + element.getQualifiedName() + " (" + element.getContainingFile().getVirtualFile().getPath() + ") pos=" + position);
         }
@@ -152,7 +177,6 @@ public class Log {
                 }
                 sb.append(entry.getKey()).append(":").append(entry.getValue());
                 start = false;
-
             }
             m_log.debug(comment + SEP + "[" + sb.toString() + "]");
         }
@@ -180,7 +204,27 @@ public class Log {
         }
     }
 
+    public void trace(String msg, VirtualFile sourceFile) {
+        if (m_log.isTraceEnabled()) {
+            m_log.trace(msg + SEP + "file: " + sourceFile);
+        }
+    }
+
     public void warn(@NotNull Exception e) {
         m_log.warn(e);
+    }
+
+    public void info(String msg, Map<Module, VirtualFile> rootContents) {
+        StringBuilder sb = new StringBuilder();
+        for (Map.Entry<Module, VirtualFile> entry : rootContents.entrySet()) {
+            sb.append("(module ").append(entry.getKey()).append(", file ").append(entry.getValue()).append(")");
+        }
+        m_log.info(msg + SEP + sb.toString());
+    }
+
+    public void debug(String comment, String[] values) {
+        if (m_log.isDebugEnabled()) {
+            m_log.debug(comment + SEP + "[" + Joiner.join(", ", values) + "]");
+        }
     }
 }

@@ -1,5 +1,9 @@
 package com.reason.lang.core.psi.impl;
 
+import java.util.*;
+import javax.swing.*;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import com.intellij.lang.ASTNode;
 import com.intellij.navigation.ItemPresentation;
 import com.intellij.psi.PsiElement;
@@ -8,30 +12,30 @@ import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.psi.stubs.IStubElementType;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.IncorrectOperationException;
-import com.reason.Icons;
+import icons.ORIcons;
+import com.reason.ide.files.FileBase;
 import com.reason.ide.search.PsiFinder;
 import com.reason.lang.ModuleHelper;
-import com.reason.lang.core.ModulePath;
 import com.reason.lang.core.ORUtil;
-import com.reason.lang.core.psi.*;
+import com.reason.lang.core.psi.ExpressionScope;
+import com.reason.lang.core.psi.PsiExternal;
+import com.reason.lang.core.psi.PsiInclude;
+import com.reason.lang.core.psi.PsiInnerModule;
+import com.reason.lang.core.psi.PsiLet;
+import com.reason.lang.core.psi.PsiModule;
+import com.reason.lang.core.psi.PsiOpen;
+import com.reason.lang.core.psi.PsiScopedExpr;
+import com.reason.lang.core.psi.PsiSignature;
+import com.reason.lang.core.psi.PsiType;
+import com.reason.lang.core.psi.PsiUpperSymbol;
+import com.reason.lang.core.psi.PsiVal;
 import com.reason.lang.core.stub.PsiModuleStub;
 import com.reason.lang.core.type.ORTypes;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
-
-import javax.swing.*;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 
 import static com.reason.lang.core.ORFileType.interfaceOrImplementation;
-import static java.util.Collections.emptyList;
+import static java.util.Collections.*;
 
 public class PsiInnerModuleImpl extends PsiTokenStub<ORTypes, PsiModuleStub> implements PsiInnerModule {
-
-    @Nullable
-    private ModulePath m_modulePath = null;
 
     //region Constructors
     public PsiInnerModuleImpl(@NotNull ORTypes types, @NotNull ASTNode node) {
@@ -44,10 +48,11 @@ public class PsiInnerModuleImpl extends PsiTokenStub<ORTypes, PsiModuleStub> imp
     //endregion
 
     //region NamedElement
+    @Nullable
     @Override
     public String getName() {
         PsiElement nameIdentifier = getNameIdentifier();
-        return nameIdentifier == null ? "" : nameIdentifier.getText();
+        return nameIdentifier == null ? null : nameIdentifier.getText();
     }
 
     @Nullable
@@ -63,7 +68,25 @@ public class PsiInnerModuleImpl extends PsiTokenStub<ORTypes, PsiModuleStub> imp
     }
     //endregion
 
-    @Nullable
+    @NotNull
+    @Override
+    public String getModuleName() {
+        String name = getName();
+        return name == null ? "" : name;
+    }
+
+    @NotNull
+    @Override
+    public String getPath() {
+        PsiModuleStub stub = getGreenStub();
+        if (stub != null) {
+            return stub.getPath();
+        }
+
+        return ORUtil.getQualifiedPath(this);
+    }
+
+    @NotNull
     @Override
     public String getQualifiedName() {
         PsiModuleStub stub = getGreenStub();
@@ -123,15 +146,19 @@ public class PsiInnerModuleImpl extends PsiTokenStub<ORTypes, PsiModuleStub> imp
 
     @NotNull
     @Override
-    public Collection<PsiNameIdentifierOwner> getExpressions() {
+    public Collection<PsiNameIdentifierOwner> getExpressions(@NotNull ExpressionScope eScope) {
         Collection<PsiNameIdentifierOwner> result = emptyList();
 
         String alias = getAlias();
         if (alias != null) {
             // Open alias and getExpressions on alias
-            PsiModule moduleAlias = PsiFinder.getInstance(getProject()).findModule(alias, interfaceOrImplementation, GlobalSearchScope.allScope(getProject()));
-            if (moduleAlias != null) {
-                result = moduleAlias.getExpressions();
+            Set<PsiModule> modulesbyName = PsiFinder.getInstance(getProject())
+                    .findModulesbyName(alias, interfaceOrImplementation, null, GlobalSearchScope.allScope(getProject()));
+            if (!modulesbyName.isEmpty()) {
+                PsiModule moduleAlias = modulesbyName.iterator().next();
+                if (moduleAlias != null) {
+                    result = moduleAlias.getExpressions(eScope);
+                }
             }
         } else {
             PsiSignature signature = getSignature();
@@ -164,7 +191,7 @@ public class PsiInnerModuleImpl extends PsiTokenStub<ORTypes, PsiModuleStub> imp
 
     @NotNull
     @Override
-    public Collection<PsiLet> getLetExpressions() {
+    public List<PsiLet> getLetExpressions() {
         PsiElement body = getBody();
         return body == null ? emptyList() : PsiTreeUtil.getStubChildrenOfTypeAsList(body, PsiLet.class);
     }
@@ -279,30 +306,9 @@ public class PsiInnerModuleImpl extends PsiTokenStub<ORTypes, PsiModuleStub> imp
             @NotNull
             @Override
             public Icon getIcon(boolean unused) {
-                return Icons.MODULE;
+                return ORIcons.MODULE;
             }
         };
-    }
-
-    @NotNull
-    private ModulePath getPath() {
-        // TODO: use stub
-        if (m_modulePath == null) {
-            List<PsiElement> parents = new ArrayList<>();
-
-            PsiInnerModule parent = PsiTreeUtil.getStubOrPsiParentOfType(this, PsiInnerModule.class);
-            while (parent != null) {
-                parents.add(parent);
-                parent = PsiTreeUtil.getStubOrPsiParentOfType(parent, PsiInnerModule.class);
-            }
-
-            parents.add(getContainingFile());
-
-            Collections.reverse(parents);
-            m_modulePath = new ModulePath(parents);
-        }
-
-        return m_modulePath;
     }
 
     @Override
@@ -313,6 +319,18 @@ public class PsiInnerModuleImpl extends PsiTokenStub<ORTypes, PsiModuleStub> imp
         }
 
         return ModuleHelper.isComponent(getBody());
+    }
+
+    @NotNull
+    @Override
+    public PsiElement getNavigationElement() {
+        if (isComponent()) {
+            PsiLet make = getLetExpression("make");
+            if (make != null) {
+                return make;
+            }
+        }
+        return super.getNavigationElement();
     }
 
     @Override
@@ -331,10 +349,14 @@ public class PsiInnerModuleImpl extends PsiTokenStub<ORTypes, PsiModuleStub> imp
         return null;
     }
 
+    @Override
+    public boolean isInterface() {
+        return ((FileBase) getContainingFile()).isInterface();
+    }
+
     @Nullable
     @Override
     public String toString() {
         return "Module " + getQualifiedName();
     }
-
 }

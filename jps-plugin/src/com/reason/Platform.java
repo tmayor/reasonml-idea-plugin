@@ -3,10 +3,12 @@ package com.reason;
 import com.intellij.ide.plugins.IdeaPluginDescriptor;
 import com.intellij.ide.plugins.PluginManager;
 import com.intellij.openapi.extensions.PluginId;
+import com.intellij.openapi.module.Module;
+import com.intellij.openapi.module.ModuleManager;
 import com.intellij.openapi.project.Project;
+import com.intellij.openapi.roots.ModuleRootManager;
 import com.intellij.openapi.util.SystemInfo;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.psi.PsiFile;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -15,7 +17,6 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -23,9 +24,13 @@ public class Platform {
 
     public static final String LOCAL_BS_PLATFORM = "/node_modules/bs-platform";
     public static final String LOCAL_NODE_MODULES_BIN = "/node_modules/.bin";
+    public static final String DUNE_NAME = "dune-project";
+    public static final String PACKAGE_JSON_NAME = "package.json";
+    public static final String ESY_PROJECT_IDENTIFIER = "_esy";
+    public static final String BSCONFIG_JSON_NAME = "bsconfig.json";
     public static final Charset UTF8 = StandardCharsets.UTF_8;
 
-    private static final Map<Project, VirtualFile> m_baseDirs = new HashMap<>();
+    private static final Log LOG = Log.create("platform");
 
     private Platform() {
     }
@@ -47,32 +52,78 @@ public class Platform {
         return "";
     }
 
-    @NotNull
+    public static boolean isWindows() {
+        return SystemInfo.isWindows;
+    }
+
+    @Nullable
     public static File getPluginLocation() {
         IdeaPluginDescriptor plugin = PluginManager.getPlugin(PluginId.getId("reasonml"));
-        assert plugin != null;
-        return plugin.getPath();
+        return plugin == null ? null : plugin.getPath();
     }
 
     @NotNull
-    public static VirtualFile findBaseRoot(@NotNull Project project) {
-        VirtualFile baseDir = m_baseDirs.get(project);
-        if (baseDir == null) {
-            baseDir = project.getBaseDir();
-            if (baseDir.findChild("package.json") == null) {
-                // try to find it one level deeper
-                baseDir = Arrays.stream(baseDir.getChildren()).filter(file -> file.findChild("package.json") != null).findFirst().orElse(baseDir);
+    private static Map<Module, VirtualFile> findContentRootsFor(@NotNull Project project, @NotNull String filename) {
+        Map<Module, VirtualFile> rootContents = new HashMap<>();
+
+        ModuleManager moduleManager = ModuleManager.getInstance(project);
+        for (Module module : moduleManager.getModules()) {
+            for (VirtualFile contentRoot : ModuleRootManager.getInstance(module).getContentRoots()) {
+                VirtualFile packageJson = contentRoot.findChild(filename);
+                if (packageJson != null && !rootContents.containsKey(module)) {
+                    rootContents.put(module, packageJson);
+                }
             }
-            m_baseDirs.put(project, baseDir);
         }
-        return baseDir;
+
+        return rootContents;
     }
 
-    // Iterate through parents until a bsConfig.json is found - must not be called for an OCaml project
-    @NotNull
-    public static VirtualFile findBaseRootFromFile(@NotNull Project project, @NotNull VirtualFile sourceFile) {
-        VirtualFile baseDir = project.getBaseDir();
-        if (sourceFile.equals(baseDir)) {
+    public static VirtualFile findContentRootFor(@NotNull Project project, @NotNull String filename) {
+        Map<Module, VirtualFile> rootContents = findContentRootsFor(project, filename);
+
+        if (rootContents.isEmpty()) {
+            LOG.warn("No content roots with " + filename + " file found");
+            return null;
+        } else if (rootContents.size() == 1) {
+            Module module = rootContents.keySet().iterator().next();
+            VirtualFile file = rootContents.get(module);
+            return file.getParent();
+        } else {
+            Module module = rootContents.keySet().iterator().next();
+            VirtualFile file = rootContents.get(module);
+            LOG.info("Many modules with " + filename + " file in it found (" + rootContents.size() + "), using first", rootContents);
+            return file.getParent();
+        }
+    }
+
+    public static VirtualFile findORDuneContentRoot(@NotNull Project project) {
+        return findContentRootFor(project, DUNE_NAME);
+    }
+
+    public static VirtualFile findOREsyContentRoot(@NotNull Project project) {
+        return findContentRootFor(project, ESY_PROJECT_IDENTIFIER);
+    }
+
+    @Nullable
+    public static VirtualFile findORPackageJsonContentRoot(@NotNull Project project) {
+        return findContentRootFor(project, PACKAGE_JSON_NAME);
+    }
+
+    @Nullable
+    public static VirtualFile findProjectBsconfig(@NotNull Project project) {
+        // @TODO use `BsConfigFile.isBsConfig(file)`
+        VirtualFile contentRoot = findORPackageJsonContentRoot(project);
+        return contentRoot == null ? null : contentRoot.findChild(BSCONFIG_JSON_NAME);
+    }
+
+    // Special finder that iterate through parents until a bsConfig.json is found.
+    // This is always needed, we can't use module itself
+
+    @Nullable
+    public static VirtualFile findAncestorBsconfig(@NotNull Project project, @NotNull VirtualFile sourceFile) {
+        VirtualFile contentRoot = findProjectBsconfig(project);
+        if (sourceFile.equals(contentRoot)) {
             return sourceFile;
         }
 
@@ -81,7 +132,7 @@ public class Platform {
             return sourceFile;
         }
 
-        VirtualFile child = parent.findChild("bsconfig.json");
+        VirtualFile child = parent.findChild(BSCONFIG_JSON_NAME);
         while (child == null) {
             VirtualFile grandParent = parent.getParent();
             if (grandParent == null) {
@@ -89,19 +140,27 @@ public class Platform {
             }
 
             parent = grandParent;
-            child = parent.findChild("bsconfig.json");
-            if (parent.equals(baseDir)) {
+            child = parent.findChild(BSCONFIG_JSON_NAME);
+            if (parent.equals(contentRoot)) {
                 break;
             }
         }
 
-        return parent;
+        return child;
+    }
+
+    public static VirtualFile findAncestorContentRoot(Project project, VirtualFile file) {
+        VirtualFile bsConfig = findAncestorBsconfig(project, file);
+        return bsConfig == null ? null : bsConfig.getParent();
     }
 
     @NotNull
     public static String removeProjectDir(@NotNull Project project, @NotNull String path) {
         try {
-            VirtualFile baseRoot = Platform.findBaseRoot(project);
+            VirtualFile baseRoot = Platform.findORPackageJsonContentRoot(project);
+            if (baseRoot == null) {
+                return path;
+            }
             Path basePath = FileSystems.getDefault().getPath(baseRoot.getPath());
             Path relativePath = basePath.relativize(new File(path).toPath());
             return relativePath.toString();
@@ -110,15 +169,16 @@ public class Platform {
         }
     }
 
-    @NotNull
-    public static String removeProjectDir(@NotNull Project project, @NotNull PsiFile file) {
-        VirtualFile virtualFile = file.getVirtualFile();
-        return (virtualFile == null) ? "" : removeProjectDir(project, virtualFile.getPath());
-    }
-
     @Nullable
-    public static VirtualFile findBsConfigFromFile(@NotNull Project project, @NotNull VirtualFile file) {
-        VirtualFile baseRoot = Platform.findBaseRootFromFile(project, file);
-        return baseRoot.findFileByRelativePath("bsconfig.json");
+    public static VirtualFile findFileByRelativePath(@NotNull Project project, @NotNull String path) {
+        for (Module module : ModuleManager.getInstance(project).getModules()) {
+            VirtualFile moduleFile = module.getModuleFile();
+            VirtualFile baseDir = moduleFile == null ? null : moduleFile.getParent();
+            VirtualFile file = baseDir == null ? null : baseDir.findFileByRelativePath(path);
+            if (file != null) {
+                return file;
+            }
+        }
+        return null;
     }
 }

@@ -1,14 +1,12 @@
 <idea-plugin>
     <extensions defaultExtensionNs="com.intellij">
-        <sdkType implementation="com.reason.OCamlSdkType"/>
+        <sdkType implementation="com.reason.sdk.OCamlSdkType"/>
         <configurationType implementation="com.reason.ide.repl.ReplRunConfigurationType"/>
         <moduleConfigurationEditorProvider implementation="com.reason.module.OCamlDefaultModuleEditorsProvider"/>
         <projectStructure.sourceRootEditHandler implementation="com.reason.module.OCamlBinaryRootEditHandler"/>
 
         <orderRootType implementation="com.reason.OCamlSourcesOrderRootType"/>
         <OrderRootTypeUI key="OCAML_SOURCES" implementationClass="com.reason.OCamlSourcesOrderRootTypeUIFactory"/>
-
-        <postStartupActivity implementation="com.reason.ide.ORPostStartupActivity"/>
 
         <!--
          | External system integration (the import from model...)
@@ -31,6 +29,10 @@
 
         <projectService serviceImplementation="com.reason.dune.DuneCompiler"/>
         <projectService serviceImplementation="com.reason.dune.DuneProcess"/>
+
+        <!-- Esy -->
+
+        <projectService serviceImplementation="com.reason.esy.EsyProcess"/>
 
         <!-- Gutter icons -->
 

@@ -1,7 +1,5 @@
 package com.reason.ide.console;
 
-import javax.swing.*;
-import org.jetbrains.annotations.NotNull;
 import com.intellij.execution.ui.ConsoleView;
 import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.components.ServiceManager;
@@ -14,9 +12,12 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.psi.PsiDocumentManager;
 import com.intellij.psi.PsiFile;
 import com.reason.Compiler;
-import com.reason.Platform;
+import com.reason.CompilerType;
 import com.reason.bs.Bucklescript;
-import com.reason.ide.CompilerManager;
+import com.reason.ide.ORCompilerManager;
+import org.jetbrains.annotations.NotNull;
+
+import javax.swing.*;
 
 abstract class CompilerAction extends DumbAwareAction {
 
@@ -24,17 +25,23 @@ abstract class CompilerAction extends DumbAwareAction {
         super(text, description, icon);
     }
 
+    public abstract CompilerType getCompilerType();
+
     void doAction(@NotNull Project project, @NotNull CliType cliType) {
-        Compiler compiler = CompilerManager.getInstance().getCompiler(project);
+        Compiler compiler = ORCompilerManager.getInstance().getCompiler(project);
 
         // Try to detect the current active editor
         Editor editor = FileEditorManager.getInstance(project).getSelectedTextEditor();
         if (editor == null) {
-            VirtualFile baseDir = Platform.findBaseRoot(project);
             ConsoleView console = ServiceManager.getService(project, Bucklescript.class).getBsbConsole();
             if (console != null) {
-                console.print("No active text editor found, using root directory " + baseDir.getPath() + "\n", ConsoleViewContentType.NORMAL_OUTPUT);
-                compiler.run(baseDir, cliType, null);
+                VirtualFile baseDir = compiler.findContentRoot(project);
+                if (baseDir == null) {
+                    console.print("Can't find content root\n", ConsoleViewContentType.NORMAL_OUTPUT);
+                } else {
+                    console.print("No active text editor found, using root directory " + baseDir.getPath() + "\n", ConsoleViewContentType.NORMAL_OUTPUT);
+                    compiler.run(baseDir, cliType, null);
+                }
             }
         } else {
             Document document = editor.getDocument();

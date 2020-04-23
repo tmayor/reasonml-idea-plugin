@@ -1,10 +1,5 @@
 package com.reason.bs;
 
-import java.io.*;
-import java.util.concurrent.atomic.*;
-import java.util.regex.*;
-import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.GeneralCommandLine;
 import com.intellij.execution.process.ProcessHandler;
@@ -12,44 +7,47 @@ import com.intellij.notification.NotificationType;
 import com.intellij.notification.Notifications;
 import com.intellij.openapi.project.Project;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.vfs.VirtualFileManager;
 import com.reason.Compiler;
-import com.reason.CompilerProcessLifecycle;
-import com.reason.Platform;
-import com.reason.ide.ORNotification;
+import com.reason.*;
 import com.reason.ide.console.CliType;
 import com.reason.ide.settings.ReasonSettings;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
+
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import static com.intellij.notification.NotificationListener.URL_OPENING_LISTENER;
 import static com.intellij.notification.NotificationType.ERROR;
-import static com.intellij.openapi.vfs.StandardFileSystems.FILE_PROTOCOL_PREFIX;
-import static com.reason.Platform.*;
+import static com.reason.bs.BsBinaries.getBsbPath;
+import static com.reason.bs.BsBinaries.getBscPath;
 
-public final class BsProcess implements CompilerProcessLifecycle {
+public final class BsProcess implements CompilerProcess {
 
-    private static final Pattern BS_VERSION_REGEXP = Pattern.compile(".*OCaml[:]?(\\d\\.\\d+).+\\)");
+    private static final Pattern BS_VERSION_REGEXP = Pattern.compile(".*OCaml[:]?(\\d\\.\\d+.\\d+).+\\)");
 
     @NotNull
     private final Project m_project;
 
     @Nullable
     private BsProcessHandler m_bsb;
-    private RawProcessListener m_outputListener;
+    //private RawProcessListener m_outputListener;
 
     private final AtomicBoolean m_started = new AtomicBoolean(false);
     private final AtomicBoolean m_restartNeeded = new AtomicBoolean(false);
 
     public BsProcess(@NotNull Project project) {
         m_project = project;
-        VirtualFile baseRoot = Platform.findBaseRoot(project);
-        VirtualFile sourceFile = baseRoot.findChild("bsconfig.json");
-        if (sourceFile != null) {
-            create(sourceFile, CliType.make, null);
-        }
+        create(Platform.findProjectBsconfig(project), CliType.Bs.MAKE, null);
     }
 
     // Wait for the tool window to be ready before starting the process
-    void startNotify() {
+    @Override
+    public void startNotify() {
         if (m_bsb != null && !m_bsb.isStartNotified()) {
             try {
                 m_bsb.startNotify();
@@ -59,18 +57,29 @@ public final class BsProcess implements CompilerProcessLifecycle {
         }
     }
 
-    private void create(@NotNull VirtualFile sourceFile, @NotNull CliType cliType, @Nullable Compiler.ProcessTerminated onProcessTerminated) {
+    private void create(@Nullable VirtualFile sourceFile, @NotNull CliType.Bs cliType,
+            @Nullable Compiler.ProcessTerminated onProcessTerminated) {
         try {
-            createProcessHandler(sourceFile, cliType, onProcessTerminated);
+            if (sourceFile != null) {
+                createProcessHandler(sourceFile, cliType, onProcessTerminated);
+            }
         } catch (ExecutionException e) {
             // Don't log when first time execution
         }
     }
 
+    @Override
+    public ProcessHandler recreate(@NotNull CliType cliType, @Nullable Compiler.ProcessTerminated onProcessTerminated) {
+        throw new RuntimeException("Method not yet implemented.");
+    }
+
     @Nullable
-    ProcessHandler recreate(@NotNull VirtualFile sourceFile, @NotNull CliType cliType, @Nullable Compiler.ProcessTerminated onProcessTerminated) {
+    public ProcessHandler recreate(@NotNull VirtualFile sourceFile, @NotNull CliType cliType, @Nullable Compiler.ProcessTerminated onProcessTerminated) {
+        if (!(cliType instanceof CliType.Bs)) {
+            throw new CompilerProcessException("Invalid cliType command.", CompilerType.BS);
+        }
         try {
-            return createProcessHandler(sourceFile, cliType, onProcessTerminated);
+            return createProcessHandler(sourceFile, (CliType.Bs) cliType, onProcessTerminated);
         } catch (ExecutionException e) {
             Notifications.Bus.notify(new ORNotification("Bsb", "Can't run bsb\n" + e.getMessage(), NotificationType.ERROR));
         }
@@ -79,17 +88,17 @@ public final class BsProcess implements CompilerProcessLifecycle {
     }
 
     @Nullable
-    private ProcessHandler createProcessHandler(@NotNull VirtualFile sourceFile, @NotNull CliType cliType,
+    private ProcessHandler createProcessHandler(@NotNull VirtualFile sourceFile, @NotNull CliType.Bs cliType,
                                                 @Nullable Compiler.ProcessTerminated onProcessTerminated) throws ExecutionException {
         killIt();
         GeneralCommandLine cli = getGeneralCommandLine(sourceFile, cliType);
         if (cli != null) {
             m_bsb = new BsProcessHandler(cli, onProcessTerminated);
-            if (m_outputListener == null) {
-                addListener(new BsOutputListener(m_project, this));
-            } else {
-                m_bsb.addRawProcessListener(m_outputListener);
-            }
+            //if (m_outputListener == null) {
+            addListener(new BsOutputListener(m_project, this));
+            //} else {
+            //    m_bsb.addRawProcessListener(m_outputListener);
+            //}
         }
         return m_bsb;
     }
@@ -102,28 +111,14 @@ public final class BsProcess implements CompilerProcessLifecycle {
     }
 
     private void addListener(RawProcessListener outputListener) {
-        m_outputListener = outputListener;
+        //m_outputListener = outputListener;
         if (m_bsb != null) {
             m_bsb.addRawProcessListener(outputListener);
         }
     }
 
     @Nullable
-    private static String getBsbPath(@NotNull Project project, @NotNull VirtualFile sourceFile) {
-        String workingDir = ReasonSettings.getInstance(project).getWorkingDir(sourceFile);
-
-        VirtualFileManager virtualFileManager = VirtualFileManager.getInstance();
-        VirtualFile bsbPath = virtualFileManager.findFileByUrl(FILE_PROTOCOL_PREFIX + workingDir + LOCAL_BS_PLATFORM + "/lib/bsb.exe");
-
-        if (bsbPath == null) {
-            bsbPath = virtualFileManager.findFileByUrl(FILE_PROTOCOL_PREFIX + workingDir + LOCAL_NODE_MODULES_BIN + "/bsb");
-        }
-
-        return bsbPath == null ? null : bsbPath.getCanonicalPath();
-    }
-
-    @Nullable
-    private GeneralCommandLine getGeneralCommandLine(@NotNull VirtualFile sourceFile, @NotNull CliType cliType) {
+    private GeneralCommandLine getGeneralCommandLine(@NotNull VirtualFile sourceFile, @NotNull CliType.Bs cliType) {
         String bsbPath = getBsbPath(m_project, sourceFile);
         if (bsbPath == null) {
             Notifications.Bus.notify(new ORNotification("Bsb", "<html>Can't find bsb.\n" + "The working directory is '" + ReasonSettings.getInstance(m_project)
@@ -134,10 +129,10 @@ public final class BsProcess implements CompilerProcessLifecycle {
 
         GeneralCommandLine cli;
         switch (cliType) {
-            case make:
+            case MAKE:
                 cli = new GeneralCommandLine(bsbPath, "-make-world");
                 break;
-            case cleanMake:
+            case CLEAN_MAKE:
                 cli = new GeneralCommandLine(bsbPath, "-clean-world", "-make-world");
                 break;
             default:
@@ -150,6 +145,7 @@ public final class BsProcess implements CompilerProcessLifecycle {
         return cli;
     }
 
+    @Override
     public boolean start() {
         boolean success = m_started.compareAndSet(false, true);
         if (!success) {
@@ -158,15 +154,15 @@ public final class BsProcess implements CompilerProcessLifecycle {
         return success;
     }
 
-    public void terminated() {
+    @Override
+    public void terminate() {
         m_bsb = null;
         m_started.set(false);
     }
 
     @Nullable
     public String getOCamlVersion(@NotNull VirtualFile sourceFile) {
-        String bsb = getBsbPath(m_project, sourceFile);
-        String bsc = bsb == null ? null : bsb.replace("bsb.exe", "bsc.exe");
+        String bsc = getBscPath(m_project, sourceFile);
         if (bsc != null) {
             Process p = null;
             try {

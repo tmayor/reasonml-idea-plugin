@@ -4,7 +4,7 @@ import com.intellij.openapi.editor.colors.TextAttributesKey;
 import com.intellij.openapi.options.colors.AttributesDescriptor;
 import com.intellij.openapi.options.colors.ColorDescriptor;
 import com.intellij.openapi.options.colors.ColorSettingsPage;
-import com.reason.Icons;
+import icons.ORIcons;
 import com.reason.ide.highlight.ORSyntaxHighlighter;
 import com.reason.lang.reason.RmlTypes;
 import org.jetbrains.annotations.NotNull;
@@ -17,20 +17,21 @@ import java.util.Map;
 public class ReasonColorSettingsPage implements ColorSettingsPage {
     private static final AttributesDescriptor[] DESCRIPTORS = new AttributesDescriptor[]{
             new AttributesDescriptor("Annotation", ORSyntaxHighlighter.ANNOTATION_),
-            new AttributesDescriptor("Comment", ORSyntaxHighlighter.RML_COMMENT_),
-            new AttributesDescriptor("Code lens", ORSyntaxHighlighter.CODE_LENS_),
-            new AttributesDescriptor("Module name", ORSyntaxHighlighter.MODULE_NAME_),
-            new AttributesDescriptor("Option", ORSyntaxHighlighter.OPTION_),
-            new AttributesDescriptor("Markup tag", ORSyntaxHighlighter.MARKUP_TAG_),
-            new AttributesDescriptor("Markup attribute", ORSyntaxHighlighter.MARKUP_ATTRIBUTE_),
-            new AttributesDescriptor("Keyword", ORSyntaxHighlighter.KEYWORD_),
-            new AttributesDescriptor("Operation", ORSyntaxHighlighter.OPERATION_SIGN_),
-            new AttributesDescriptor("String", ORSyntaxHighlighter.STRING_),
-            new AttributesDescriptor("Number", ORSyntaxHighlighter.NUMBER_),
-            new AttributesDescriptor("Semicolon", ORSyntaxHighlighter.SEMICOLON_),
             new AttributesDescriptor("Braces", ORSyntaxHighlighter.BRACES_),
             new AttributesDescriptor("Brackets", ORSyntaxHighlighter.BRACKETS_),
+            new AttributesDescriptor("Code lens", ORSyntaxHighlighter.CODE_LENS_),
+            new AttributesDescriptor("Comment", ORSyntaxHighlighter.RML_COMMENT_),
+            new AttributesDescriptor("Keyword", ORSyntaxHighlighter.KEYWORD_),
+            new AttributesDescriptor("Markup attribute", ORSyntaxHighlighter.MARKUP_ATTRIBUTE_),
+            new AttributesDescriptor("Markup tag", ORSyntaxHighlighter.MARKUP_TAG_),
+            new AttributesDescriptor("Module name", ORSyntaxHighlighter.MODULE_NAME_),
+            new AttributesDescriptor("Number", ORSyntaxHighlighter.NUMBER_),
+            new AttributesDescriptor("Option", ORSyntaxHighlighter.OPTION_),
+            new AttributesDescriptor("Operation", ORSyntaxHighlighter.OPERATION_SIGN_),
             new AttributesDescriptor("Parenthesis", ORSyntaxHighlighter.PARENS_),
+            new AttributesDescriptor("Poly variant", ORSyntaxHighlighter.POLY_VARIANT_),
+            new AttributesDescriptor("Semicolon", ORSyntaxHighlighter.SEMICOLON_),
+            new AttributesDescriptor("String", ORSyntaxHighlighter.STRING_),
             new AttributesDescriptor("Type argument", ORSyntaxHighlighter.TYPE_ARGUMENT_),
             new AttributesDescriptor("Variant name", ORSyntaxHighlighter.VARIANT_NAME_),
     };
@@ -38,7 +39,7 @@ public class ReasonColorSettingsPage implements ColorSettingsPage {
     @Nullable
     @Override
     public Icon getIcon() {
-        return Icons.RML_FILE;
+        return ORIcons.RML_FILE;
     }
 
     @NotNull

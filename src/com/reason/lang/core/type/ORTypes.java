@@ -12,9 +12,11 @@ public abstract class ORTypes {
     public IElementType C_CLASS_METHOD;
     public IElementType C_CLASS_PARAMS;
     public IElementType C_CLASS_STMT;
+    public IElementType C_DECONSTRUCTION;
     public IElementType C_DIRECTIVE;
     public IElementType C_EXTERNAL_STMT;
     public IElementType C_EXP_TYPE;
+    public IElementType C_FAKE_MODULE;
     public IElementType C_LET_STMT;
     public IElementType C_MODULE_STMT;
     public IElementType C_VAL_EXPR;
@@ -22,6 +24,7 @@ public abstract class ORTypes {
     public IElementType C_EXCEPTION_EXPR;
     public IElementType C_OPEN;
     public IElementType C_INCLUDE;
+    public IElementType C_LET_ATTR;
     public IElementType C_LET_BINDING;
     public IElementType C_MACRO_EXPR;
     public IElementType C_MACRO_NAME;
@@ -30,6 +33,7 @@ public abstract class ORTypes {
     public IElementType C_FUN_EXPR;
     public IElementType C_FUN_PARAMS;
     public IElementType C_FUN_PARAM;
+    public IElementType C_FUN_PARAM_BINDING;
     public IElementType C_FUN_BODY;
     public IElementType C_FUNCTOR;
     public IElementType C_FUNCTOR_BINDING;
@@ -98,7 +102,9 @@ public abstract class ORTypes {
     public ORTokenElementType CONSTRAINT;
     public ORTokenElementType DIRECTIVE_IF;
     public ORTokenElementType DIRECTIVE_ELSE;
+    public ORTokenElementType DIRECTIVE_ELIF;
     public ORTokenElementType DIRECTIVE_END;
+    public ORTokenElementType DIRECTIVE_ENDIF;
     public ORTokenElementType DO;
     public ORTokenElementType DONE;
     public ORTokenElementType DOWNTO;

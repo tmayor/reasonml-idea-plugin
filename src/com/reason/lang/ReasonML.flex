@@ -171,15 +171,18 @@ ESCAPE_CHAR= {ESCAPE_BACKSLASH} | {ESCAPE_SINGLE_QUOTE} | {ESCAPE_LF} | {ESCAPE_
     ({FLOAT_LITERAL} | {HEXA_FLOAT_LITERAL}){LITERAL_MODIFIER}? { return types.FLOAT_VALUE; }
     "'"{LOWERCASE}{IDENTCHAR}*       { return types.TYPE_ARGUMENT; }
     "`"{UPPERCASE}{IDENTCHAR}*       { return types.POLY_VARIANT; }
+    "`"{LOWERCASE}{IDENTCHAR}*       { return types.POLY_VARIANT; }
 
     "\"" { yybegin(IN_STRING); tokenStart(); }
     "/*" { yybegin(IN_REASON_ML_COMMENT); commentDepth = 1; tokenStart(); }
     "//" { yybegin(IN_REASON_SL_COMMENT); tokenStart(); }
     "(*" { yybegin(IN_OCAML_ML_COMMENT); commentDepth = 1; tokenStart(); }
 
-    "#if"   { return types.DIRECTIVE_IF; }
-    "#else" { return types.DIRECTIVE_ELSE; }
-    "#end"  { return types.DIRECTIVE_END; }
+    "#if"     { return types.DIRECTIVE_IF; }
+    "#else"   { return types.DIRECTIVE_ELSE; }
+    "#elif"   { return types.DIRECTIVE_ELIF; }
+    "#endif"  { return types.DIRECTIVE_ENDIF; }
+    "#end"    { return types.DIRECTIVE_END; }
 
     "&&"  { return types.ANDAND; }
     "##"  { return types.SHARPSHARP; }

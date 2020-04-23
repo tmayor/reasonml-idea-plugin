@@ -9,7 +9,8 @@ import com.intellij.navigation.ItemPresentation;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.IncorrectOperationException;
-import com.reason.Icons;
+import icons.ORIcons;
+import com.reason.lang.core.ORUtil;
 import com.reason.lang.core.psi.PsiClass;
 import com.reason.lang.core.psi.PsiClassConstructor;
 import com.reason.lang.core.psi.PsiClassField;
@@ -28,6 +29,7 @@ public class PsiClassImpl extends PsiToken<ORTypes> implements PsiClass {
     //endregion
 
     //region NamedElement
+    @Nullable
     @Override
     public String getName() {
         PsiElement nameIdentifier = getNameIdentifier();
@@ -47,10 +49,17 @@ public class PsiClassImpl extends PsiToken<ORTypes> implements PsiClass {
     }
     //endregion
 
-    @Nullable
+    @NotNull
+    @Override
+    public String getPath() {
+        return ORUtil.getQualifiedPath(this);
+    }
+
+    @NotNull
     @Override
     public String getQualifiedName() {
-        return getName();
+        String name = getName();
+        return name == null ? "" : name;
     }
 
     @Nullable
@@ -100,7 +109,7 @@ public class PsiClassImpl extends PsiToken<ORTypes> implements PsiClass {
             @NotNull
             @Override
             public Icon getIcon(boolean unused) {
-                return Icons.CLASS;
+                return ORIcons.CLASS;
             }
         };
     }
