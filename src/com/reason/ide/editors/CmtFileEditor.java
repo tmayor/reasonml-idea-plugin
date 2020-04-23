@@ -1,5 +1,6 @@
 package com.reason.ide.editors;
 
+import com.intellij.codeHighlighting.BackgroundEditorHighlighter;
 import com.intellij.icons.AllIcons;
 import com.intellij.openapi.components.ServiceManager;
 import com.intellij.openapi.fileEditor.FileEditor;
@@ -75,6 +76,16 @@ public class CmtFileEditor extends UserDataHolderBase implements FileEditor {
     }
 
     @Override
+    public void selectNotify() {
+
+    }
+
+    @Override
+    public void deselectNotify() {
+
+    }
+
+    @Override
     public void dispose() {
         Disposer.dispose(this);
     }
@@ -95,6 +106,12 @@ public class CmtFileEditor extends UserDataHolderBase implements FileEditor {
 
     @Override
     public void removePropertyChangeListener(@NotNull PropertyChangeListener listener) {
+    }
+
+    @Nullable
+    @Override
+    public BackgroundEditorHighlighter getBackgroundHighlighter() {
+        return null;
     }
 
     static class Table extends JBTable {
